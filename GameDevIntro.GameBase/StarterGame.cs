@@ -14,9 +14,15 @@ public class StarterGame : Game
 
     public StarterGame()
     {
+        //get a reference to the graphics card,
+        //for drawing and related functinality
         _graphics = new GraphicsDeviceManager(this);
+        
+        //set the base directory for loading content (graphics, sound effects, etc.)
         Content.RootDirectory = "Content";
-        IsMouseVisible = true;
+        
+        //hide the mouse
+        IsMouseVisible = false;
 
         // Set resolution 
         _graphics.PreferredBackBufferWidth = 1280;
@@ -47,6 +53,10 @@ public class StarterGame : Game
 
         //update the player
         _player.Update(gameTime);
+
+        //add updates of other objects here
+        //...
+        //...
     }
 
     private void SetDirectionFromKeyboard()
@@ -58,10 +68,17 @@ public class StarterGame : Game
         var state = Keyboard.GetState();
 
         //add all the directions, based on the four arrow keys or WASD
-        if (state.IsKeyDown(Keys.Left) || (state.IsKeyDown(Keys.A))) { _desiredDirection += Vector2.UnitX * -1; }
-        if (state.IsKeyDown(Keys.Right) || (state.IsKeyDown(Keys.D))) { _desiredDirection += Vector2.UnitX * 1; }
-        if (state.IsKeyDown(Keys.Up) || (state.IsKeyDown(Keys.W))) { _desiredDirection += Vector2.UnitY * -1; }
-        if (state.IsKeyDown(Keys.Down) || (state.IsKeyDown(Keys.S))) { _desiredDirection += Vector2.UnitY * 1; }
+        if (state.IsKeyDown(Keys.Left) || (state.IsKeyDown(Keys.A))) { _desiredDirection -= Vector2.UnitX; }
+        if (state.IsKeyDown(Keys.Right) || (state.IsKeyDown(Keys.D))) { _desiredDirection += Vector2.UnitX; }
+        if (state.IsKeyDown(Keys.Up) || (state.IsKeyDown(Keys.W))) { _desiredDirection -= Vector2.UnitY; }
+        if (state.IsKeyDown(Keys.Down) || (state.IsKeyDown(Keys.S))) { _desiredDirection += Vector2.UnitY; }
+
+        //set the speed to one in the desired direction
+        //to avoid having faster diagonal movement
+        if (_desiredDirection != Vector2.Zero)
+        {
+            _desiredDirection.Normalize(); 
+        }
 
         //set the player's direction to the result of the input
         _player.Direction = _desiredDirection;
@@ -82,6 +99,8 @@ public class StarterGame : Game
         _player.Draw(_spriteBatch, gameTime);
         
         //add other drawing here...
+        //...
+        //...
 
         //end the draweing to the spritebatch
         _spriteBatch.End();

@@ -29,6 +29,13 @@ public class MovableObject
     #endregion
 
 
+    /// <summary>
+    /// Constructor of a game object
+    /// </summary>
+    /// <param name="position">Where in the gameworld to place the game object</param>
+    /// <param name="texture">What image to use for drawing the object</param>
+    /// <param name="speed">how many pixels to move at a time - modified by the elapsed GameTime</param>
+    /// <param name="direction">The direction to move in</param>
     public MovableObject(Vector2 position, Texture2D texture, float speed = .25f, Vector2? direction = null)
     {
         Position = position;
