@@ -2,15 +2,15 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-
 namespace GameDevIntro.GameBase;
 public class StarterGame : Game
 {
     #region Variables
     private GraphicsDeviceManager _graphics;    //handle to graphics related functionality
     private SpriteBatch _spriteBatch;           //the "canvas" to draw to for visualizing game state
-    private MovableObject _player;              //the player object, with location, movement, drawing, etc.
+    private Sprite _player;                     //the player object, with location, movement, drawing, etc.
     private Texture2D _tileTexture;             //the image to use for the player
+    private SpriteFont _defaultFont;            //the default font for drawing text
     #endregion
 
     #region Constructor and LoadingContent
@@ -38,7 +38,14 @@ public class StarterGame : Game
 
         //load the white square to use as the player
         _tileTexture = Content.Load<Texture2D>("gfx/MonoGameLogo_64px");
+        _defaultFont = Content.Load<SpriteFont>("fonts/DefaultFont");
 
+        //start a new game
+        NewGame();
+    }
+
+    private void NewGame()
+    {
         //find the center of the current screen
         var centerOfScreen = new Vector2(Window.ClientBounds.Width, Window.ClientBounds.Height) / 2;
 
@@ -106,6 +113,9 @@ public class StarterGame : Game
 
         //draw the player
         _player.Draw(_spriteBatch, gameTime);
+
+        //draw the player's coordinates in the top-left corner
+        _spriteBatch.DrawString(_defaultFont, $"Player position: {_player.Position}", new Vector2(10, 10), Color.Black);
 
         //add other drawing here...
         //...

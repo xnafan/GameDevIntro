@@ -1,23 +1,22 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-
 namespace GameDevIntro.GameBase.Model;
-public class MovableObject
+public class Sprite
 {
     #region Properties
 
     /// <summary>
-    /// Where the game object is located in the game world
+    /// Where the sprite is located in the game world
     /// </summary>
     public Vector2 Position { get; set; } = new Vector2();
 
     /// <summary>
-    /// What direction the game object is heading
+    /// What direction the sprite is heading
     /// </summary>
     public Vector2 Direction { get; set; } = Vector2.Zero;
 
     /// <summary>
-    /// The image to draw for the game object
+    /// The image to draw for the sprite
     /// </summary>
     public Texture2D Texture { get; set; }
 
@@ -28,15 +27,14 @@ public class MovableObject
 
     #endregion
 
-
     /// <summary>
-    /// Constructor of a game object
+    /// Constructor of a sprite object
     /// </summary>
-    /// <param name="position">Where in the gameworld to place the game object</param>
+    /// <param name="position">Where in the gameworld to place the sprite</param>
     /// <param name="texture">What image to use for drawing the object</param>
     /// <param name="speed">how many pixels to move at a time - modified by the elapsed GameTime</param>
     /// <param name="direction">The direction to move in</param>
-    public MovableObject(Vector2 position, Texture2D texture, float speed = .25f, Vector2? direction = null)
+    public Sprite(Vector2 position, Texture2D texture, float speed = .25f, Vector2? direction = null)
     {
         Position = position;
         Direction = direction ?? Vector2.Zero; //if no direction was given, use no movement as default
@@ -45,14 +43,13 @@ public class MovableObject
     }
 
     /// <summary>
-    /// Updates the position of the game object by direction * speed
+    /// Updates the position of the sprite based on direction, speed, and elapsed game time since last update
     /// </summary>
     /// <param name="gameTime">the current gametime</param>
     public void Update(GameTime gameTime)
     {
         Position += Direction * Speed * (float)gameTime.ElapsedGameTime.TotalMilliseconds;
     }
-
 
     /// <summary>
     /// Draws the objects texture (image) centered on the Position of the object
