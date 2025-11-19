@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using GameDevIntro.GameBase.Model;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -36,7 +37,7 @@ public class StarterGame : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
         //load the white square to use as the player
-        _tileTexture = Content.Load<Texture2D>("gfx/tile");
+        _tileTexture = Content.Load<Texture2D>("gfx/MonoGameLogo_64px");
 
         //find the center of the current screen
         var centerOfScreen = new Vector2(Window.ClientBounds.Width, Window.ClientBounds.Height) / 2;
@@ -95,7 +96,7 @@ public class StarterGame : Game
     protected override void Draw(GameTime gameTime)
     {
         //clear the entire background 
-        GraphicsDevice.Clear(Color.Navy);
+        GraphicsDevice.Clear(Color.White);
 
         //call the superclass' Draw method
         base.Draw(gameTime);

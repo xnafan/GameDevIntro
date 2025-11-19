@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace GameDevIntro.GameBase;
+namespace GameDevIntro.GameBase.Model;
 public class MovableObject
 {
     #region Properties
@@ -64,6 +64,10 @@ public class MovableObject
         //calculate how far up and to the left to position of the texture
         //to center it on the Position
         var quarterTextureSize = new Vector2(Texture.Width, Texture.Height) / 2;
+
+
+        //uncomment the next line to add a shadow effect
+        //spriteBatch.Draw(Texture, Position - quarterTextureSize + new Vector2(-5,5), Color.Black * 0.3f);
 
         //draw the texture centered on the position
         spriteBatch.Draw(Texture, Position - quarterTextureSize, Color.White);
