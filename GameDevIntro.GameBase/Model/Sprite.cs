@@ -1,6 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 namespace GameDevIntro.GameBase.Model;
+
+/// <summary>
+/// A spirite is a movable object with a texture (image) to draw
+/// </summary>
 public class Sprite
 {
     #region Properties
