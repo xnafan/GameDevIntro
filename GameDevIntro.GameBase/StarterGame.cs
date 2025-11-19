@@ -17,6 +17,11 @@ public class StarterGame : Game
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
+
+        // Set resolution 
+        _graphics.PreferredBackBufferWidth = 1280;
+        _graphics.PreferredBackBufferHeight = 720;
+        _graphics.ApplyChanges();
     }
 
     protected override void LoadContent()
@@ -27,7 +32,7 @@ public class StarterGame : Game
         _dieTexture = Content.Load<Texture2D>("gfx/tile");
         
         //find the center of the current screen
-        var centerOfScreen = new Vector2(_graphics.GraphicsDevice.Viewport.Width, _graphics.GraphicsDevice.Viewport.Height)/2;
+        var centerOfScreen = new Vector2(Window.ClientBounds.Width, Window.ClientBounds.Height)/2;
         
         //instantiate a player object centered on the screen
         _player = new(centerOfScreen, _dieTexture);
