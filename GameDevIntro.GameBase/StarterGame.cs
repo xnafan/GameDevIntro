@@ -1,66 +1,84 @@
 ﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System;
 
-namespace GameDevIntro.GameBase
+namespace GameDevIntro.GameBase;
+public class StarterGame : Game
 {
-    public class StarterGame : Game
+    #region Variables
+    private GraphicsDeviceManager _graphics;
+    private SpriteBatch _spriteBatch;
+    private MovableObject _player;
+    private Texture2D _dieTexture; 
+    #endregion
+
+    public StarterGame()
     {
-        private GraphicsDeviceManager _graphics;
-        private SpriteBatch _spriteBatch;
-        private MovableObject _player;
-        private Texture2D _dieTexture;
-        public StarterGame()
-        {
-            _graphics = new GraphicsDeviceManager(this);
-            Content.RootDirectory = "Content";
-            IsMouseVisible = true;
-        }
+        _graphics = new GraphicsDeviceManager(this);
+        Content.RootDirectory = "Content";
+        IsMouseVisible = true;
+    }
 
-        protected override void Initialize()
-        {
-            base.Initialize();
-        }
+    protected override void LoadContent()
+    {
+        _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-        protected override void LoadContent()
-        {
-            _spriteBatch = new SpriteBatch(GraphicsDevice);
-            _dieTexture = Content.Load<Texture2D>("gfx/die");
-            _player = new(Vector2.One * 200, Vector2.Zero, _dieTexture);
-        }
+        //load the white square to use as the player
+        _dieTexture = Content.Load<Texture2D>("gfx/tile");
+        
+        //find the center of the current screen
+        var centerOfScreen = new Vector2(_graphics.GraphicsDevice.Viewport.Width, _graphics.GraphicsDevice.Viewport.Height)/2;
+        
+        //instantiate a player object centered on the screen
+        _player = new(centerOfScreen, _dieTexture);
+    }
 
-        protected override void Update(GameTime gameTime)
-        {
-            GetKeyboardInput();
-            _player.Update(gameTime);
+    protected override void Update(GameTime gameTime)
+    {
+        SetDirectionFromKeyboard();
 
-            base.Update(gameTime);
-        }
+        //call the superclass' Update method
+        base.Update(gameTime);
 
-        private void GetKeyboardInput()
-        {
-            var _desiredDirection = Vector2.Zero;
-            var state = Keyboard.GetState();
-            if (state.IsKeyDown(Keys.Left)) { _desiredDirection += Vector2.UnitX * -1; }
-            if (state.IsKeyDown(Keys.Right)) { _desiredDirection += Vector2.UnitX * 1; }
-            if (state.IsKeyDown(Keys.Up)) { _desiredDirection += Vector2.UnitY * -1; }
-            if (state.IsKeyDown(Keys.Down)) { _desiredDirection += Vector2.UnitY * 1; }
+        //update the player
+        _player.Update(gameTime);
+    }
 
-            _player.Direction = _desiredDirection;
-        }
+    private void SetDirectionFromKeyboard()
+    {
+        //set default direction to none
+        var _desiredDirection = Vector2.Zero;
+        
+        //retrieve the state of all keys on the keyboard
+        var state = Keyboard.GetState();
 
-        protected override void Draw(GameTime gameTime)
-        {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+        //add all the directions, based on the four arrow keys or WASD
+        if (state.IsKeyDown(Keys.Left) || (state.IsKeyDown(Keys.A))) { _desiredDirection += Vector2.UnitX * -1; }
+        if (state.IsKeyDown(Keys.Right) || (state.IsKeyDown(Keys.D))) { _desiredDirection += Vector2.UnitX * 1; }
+        if (state.IsKeyDown(Keys.Up) || (state.IsKeyDown(Keys.W))) { _desiredDirection += Vector2.UnitY * -1; }
+        if (state.IsKeyDown(Keys.Down) || (state.IsKeyDown(Keys.S))) { _desiredDirection += Vector2.UnitY * 1; }
 
-            // TODO: Add your drawing code here
+        //set the player's direction to the result of the input
+        _player.Direction = _desiredDirection;
+    }
 
-            base.Draw(gameTime);
-            _spriteBatch.Begin();
-            _player.Draw(_spriteBatch, gameTime);
-            _spriteBatch.End();
-        }
+    protected override void Draw(GameTime gameTime)
+    {
+        //clear the entire background 
+        GraphicsDevice.Clear(Color.Navy);
+        
+        //call the superclass' Draw method
+        base.Draw(gameTime);
+
+        //start the drawingto the spritebatch (i.e. background)
+        _spriteBatch.Begin();
+
+        //draw the player
+        _player.Draw(_spriteBatch, gameTime);
+        
+        //add other drawing here...
+
+        //end the draweing to the spritebatch
+        _spriteBatch.End();
     }
 }
