@@ -76,16 +76,17 @@ public class StarterGame : Game
         var _desiredDirection = Vector2.Zero;
 
         //retrieve the state of all keys on the keyboard
-        var state = Keyboard.GetState();
+        var keyboardState = Keyboard.GetState();
 
         //terminate application if ESC is pressed
-        if (state.IsKeyDown(Keys.Escape)) { Exit(); }
+        if (keyboardState.IsKeyDown(Keys.Escape)) { Exit(); }
 
         //add all the directions, based on the four arrow keys or WASD
-        if (state.IsKeyDown(Keys.Up) || (state.IsKeyDown(Keys.W))) { _desiredDirection -= Vector2.UnitY; }
-        if (state.IsKeyDown(Keys.Left) || (state.IsKeyDown(Keys.A))) { _desiredDirection -= Vector2.UnitX; }
-        if (state.IsKeyDown(Keys.Down) || (state.IsKeyDown(Keys.S))) { _desiredDirection += Vector2.UnitY; }
-        if (state.IsKeyDown(Keys.Right) || (state.IsKeyDown(Keys.D))) { _desiredDirection += Vector2.UnitX; }
+        if (keyboardState.IsKeyDown(Keys.Up) || (keyboardState.IsKeyDown(Keys.W))) { _desiredDirection -= Vector2.UnitY; }
+        if (keyboardState.IsKeyDown(Keys.Left) || (keyboardState.IsKeyDown(Keys.A))) { _desiredDirection -= Vector2.UnitX; }
+        if (keyboardState.IsKeyDown(Keys.Down) || (keyboardState.IsKeyDown(Keys.S))) { _desiredDirection += Vector2.UnitY; }
+        if (keyboardState.IsKeyDown(Keys.Right) || (keyboardState.IsKeyDown(Keys.D))) { _desiredDirection += Vector2.UnitX; }
+
 
         //set the speed to one in the desired direction
         //to avoid having faster diagonal movement
