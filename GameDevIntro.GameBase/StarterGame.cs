@@ -9,10 +9,10 @@ public class StarterGame : Game
     private GraphicsDeviceManager _graphics;    //handle to graphics related functionality
     private SpriteBatch _spriteBatch;           //the "canvas" to draw to for visualizing game state
     private Sprite _player;                     //the player object, with location, movement, drawing, etc.
-    private Texture2D _tileTexture;             //the image to use for the player
+    private Texture2D _logoTexture;             //the image to use for the player
     private SpriteFont _defaultFont;            //the default font for drawing text
     #endregion
-
+    
     #region Constructor and LoadingContent
     public StarterGame()
     {
@@ -37,7 +37,7 @@ public class StarterGame : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
         //load the white square to use as the player
-        _tileTexture = Content.Load<Texture2D>("gfx/MonoGameLogo_64px");
+        _logoTexture = Content.Load<Texture2D>("gfx/MonoGameLogo_64px");
         _defaultFont = Content.Load<SpriteFont>("fonts/DefaultFont");
 
         //start a new game
@@ -50,17 +50,17 @@ public class StarterGame : Game
         var centerOfScreen = new Vector2(Window.ClientBounds.Width, Window.ClientBounds.Height) / 2;
 
         //instantiate a player object centered on the screen
-        _player = new(centerOfScreen, _tileTexture);
+        _player = new(centerOfScreen, _logoTexture);
     }
     #endregion
 
     #region Update and related methods
     protected override void Update(GameTime gameTime)
     {
-        SetDirectionFromKeyboard();
-
         //call the superclass' Update method
         base.Update(gameTime);
+
+        SetDirectionFromKeyboard();
 
         //update the player
         _player.Update(gameTime);
@@ -82,10 +82,10 @@ public class StarterGame : Game
         if (state.IsKeyDown(Keys.Escape)) { Exit(); }
 
         //add all the directions, based on the four arrow keys or WASD
-        if (state.IsKeyDown(Keys.Left) || (state.IsKeyDown(Keys.A))) { _desiredDirection -= Vector2.UnitX; }
-        if (state.IsKeyDown(Keys.Right) || (state.IsKeyDown(Keys.D))) { _desiredDirection += Vector2.UnitX; }
         if (state.IsKeyDown(Keys.Up) || (state.IsKeyDown(Keys.W))) { _desiredDirection -= Vector2.UnitY; }
+        if (state.IsKeyDown(Keys.Left) || (state.IsKeyDown(Keys.A))) { _desiredDirection -= Vector2.UnitX; }
         if (state.IsKeyDown(Keys.Down) || (state.IsKeyDown(Keys.S))) { _desiredDirection += Vector2.UnitY; }
+        if (state.IsKeyDown(Keys.Right) || (state.IsKeyDown(Keys.D))) { _desiredDirection += Vector2.UnitX; }
 
         //set the speed to one in the desired direction
         //to avoid having faster diagonal movement
