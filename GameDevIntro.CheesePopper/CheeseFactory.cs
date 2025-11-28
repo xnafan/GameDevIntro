@@ -1,5 +1,6 @@
 ﻿using GameDevIntro.GameBase.Model;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -25,10 +26,14 @@ internal class CheeseFactory
     // The texture used for the cheese sprites
     public Texture2D CheeseTexture { get; private set; }
 
-    // Spawn boundaries for cheese sprites
-    int _minimumXSpawn, _maximumXSpawn, _minimumYSpawn, _maximumYSpawn ;
+    public int CheesesMissed { get; private set; }
 
-    public CheeseFactory(int maxCheeses, Rectangle screenDimensions, Texture2D cheeseTexture)
+    // Spawn boundaries for cheese sprites
+    private int _minimumXSpawn, _maximumXSpawn, _minimumYSpawn, _maximumYSpawn ;
+    private SoundEffect _failEffect;
+
+
+    public CheeseFactory(int maxCheeses, Rectangle screenDimensions, Texture2D cheeseTexture, SoundEffect failEffect)
     {
         MaxCheeses = maxCheeses;
         ScreenDimensions = screenDimensions;
@@ -37,6 +42,8 @@ internal class CheeseFactory
         _maximumXSpawn = ScreenDimensions.Width - CheeseTexture.Width;
         _minimumYSpawn = -(ScreenDimensions.Height * 2) + CheeseTexture.Height;
         _maximumYSpawn = -CheeseTexture.Height;
+
+        _failEffect = failEffect;
 
         CreateCheesesInRandomPositionsAboveScreen();
     }
@@ -79,13 +86,20 @@ internal class CheeseFactory
         foreach (var sprite in cheeses)
         {
             sprite.Update(gameTime);
-            if(sprite.Position.Y > ScreenDimensions.Height + CheeseTexture.Height)
+            if(sprite.Position.Y > ScreenDimensions.Height + CheeseTexture.Height/2)
             {
+                CheesesMissed++;
+                _failEffect.Play();
                 sprite.Position = GetRandomPositionAboveScreen();
             }
         }
     }
 
+    /// <summary>
+    /// Returns the cheese sprite at the given position, if any.
+    /// </summary>
+    /// <param name="position">Which position to check at</param>
+    /// <returns></returns>
     public Sprite CheckForCheeseAtPosition(Vector2 position)
     {
         foreach (var cheese in cheeses)
