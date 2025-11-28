@@ -11,7 +11,7 @@ public class CheesePopperGame : Game
     #region Variables and enums
     public enum GameState { TitleScreen, Playing, GameOver }
     public GameState CurrentState { get; set; }
-
+    private Vector2 _centerOfScreen;
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
     private Texture2D _cheeseTexture, _logoTexture, _crosshairsTexture, _heartTexture, _gameOverTexture, _pointsTexture;
@@ -53,7 +53,7 @@ public class CheesePopperGame : Game
         _heartTexture = Content.Load<Texture2D>("graphics/heart");
         _gameOverTexture = Content.Load<Texture2D>("graphics/gameover");
         _pointsTexture = Content.Load<Texture2D>("graphics/points_128px");
-        
+
         //load sound effects
         _popSoundEffect = Content.Load<SoundEffect>("Sounds/pop");
         _failEffect = Content.Load<SoundEffect>("Sounds/fail");
@@ -95,7 +95,6 @@ public class CheesePopperGame : Game
                 UpdateLivesLeft();
                 if (_leftButtonClicked)
                 {
-                    // Use cached mouse position vector instead of creating new one
                     var mousePosition = new Vector2(_currentMouseState.X, _currentMouseState.Y);
                     if (_cheeseFactory.PopCheeseAtPosition(mousePosition))
                     {
@@ -141,10 +140,6 @@ public class CheesePopperGame : Game
         {
             _graphics.IsFullScreen = !_graphics.IsFullScreen;
             _graphics.ApplyChanges();
-            
-            // Reset cached screen calculations when screen size changes
-            _centerOfScreen = Vector2.Zero;
-            _cachedScore = -1; // Force recalculation of UI positions
         }
     }
 
@@ -165,12 +160,7 @@ public class CheesePopperGame : Game
     #endregion
 
     #region Draw and related
-    private Vector2 _centerOfScreen;
-    private Vector2 _scorePosition;
-    private Vector2 _pointsPosition;
-    private string _cachedScoreString = "";
-    private int _cachedScore = -1;
-
+    
     protected override void Draw(GameTime gameTime)
     {
         base.Draw(gameTime);
@@ -240,7 +230,7 @@ public class CheesePopperGame : Game
         float mouseCursorScale = _currentMouseState.LeftButton == ButtonState.Pressed ? 0.8f : 1f;
 
         var crosshairPosition = new Vector2(
-            _currentMouseState.X - (_crosshairsTexture.Width * mouseCursorScale) / 2, 
+            _currentMouseState.X - (_crosshairsTexture.Width * mouseCursorScale) / 2,
             _currentMouseState.Y - (_crosshairsTexture.Height * mouseCursorScale) / 2);
 
         _spriteBatch.Draw(_crosshairsTexture, crosshairPosition, null, Color.White, 0f, Vector2.Zero, mouseCursorScale, SpriteEffects.None, 0f);
@@ -248,19 +238,15 @@ public class CheesePopperGame : Game
 
     private void DrawPoints(GameTime gameTime)
     {
-        // Cache string conversion only when score changes
-        if (_cachedScore != _score)
-        {
-            _cachedScoreString = _score.ToString();
-            _cachedScore = _score;
-            
-            // Recalculate position only when score changes
-            Vector2 pointTextSize = _defaultFont.MeasureString(_cachedScoreString);
-            _scorePosition = new Vector2(Window.ClientBounds.Width - _pointsTexture.Width - (pointTextSize.X + 40), 35);
-            _pointsPosition = new Vector2(Window.ClientBounds.Width - _pointsTexture.Width - 25, 25);
-        }
 
-        _spriteBatch.DrawString(_defaultFont, _cachedScoreString, _scorePosition, Color.Black, 0f, Vector2.Zero, 1.5f, SpriteEffects.None, 0f);
+        // Recalculate position only when score changes
+        Vector2 pointTextSize = _defaultFont.MeasureString(_score.ToString());
+
+        //draw score and points texture in top right corner
+        var _pointsPosition = new Vector2(Window.ClientBounds.Width - _pointsTexture.Width - 25, 25);
+        var _scorePosition = new Vector2(_pointsPosition.X - pointTextSize.X - 25, _pointsPosition.Y + 10);
+
+        _spriteBatch.DrawString(_defaultFont, _score.ToString(), _scorePosition, Color.Black, 0f, Vector2.Zero, 1.5f, SpriteEffects.None, 0f);
         _spriteBatch.Draw(_pointsTexture, _pointsPosition, Color.White);
     }
 
@@ -268,7 +254,7 @@ public class CheesePopperGame : Game
     {
         const float heartScale = 0.5f;
         const float heartSpacing = 10f;
-        
+
         for (int i = 0; i < _livesLeft; i++)
         {
             var heartPosition = new Vector2(25 + i * (_heartTexture.Width * heartScale + heartSpacing), 25);

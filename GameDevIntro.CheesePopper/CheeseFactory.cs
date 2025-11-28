@@ -28,7 +28,7 @@ public class CheeseFactory
 
     public int CheesesMissed { get; private set; }
 
-    // Spawn boundaries for cheese sprites - cached to avoid recalculation
+    // Spawn boundaries for cheese sprites
     private readonly int _minimumXSpawn, _maximumXSpawn, _maximumYSpawn;
     private int _minimumYSpawn;
     private readonly SoundEffect _failEffect;
@@ -94,7 +94,6 @@ public class CheeseFactory
             var sprite = cheeses[i];
             sprite.Update(gameTime);
             
-            // Use cached boundary value
             if (sprite.Position.Y > _screenBottomBoundary)
             {
                 CheesesMissed++;
