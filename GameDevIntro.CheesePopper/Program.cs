@@ -1,3 +1,3 @@
 ﻿
-using var game = new GameDevIntro.MousePopper.MousePopperGame();
+using var game = new GameDevIntro.MousePopper.CheesePopperGame();
 game.Run();

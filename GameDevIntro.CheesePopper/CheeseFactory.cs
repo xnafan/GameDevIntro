@@ -12,7 +12,7 @@ namespace GameDevIntro.CheesePopper;
 /// When a cheese sprite moves below the screen, it is repositioned to a random 
 /// position above the screen.
 /// </summary>
-internal class CheeseFactory
+public class CheeseFactory
 {
     // A list to hold all the cheese sprites managed by this factory
     private readonly List<Sprite> cheeses = new();
@@ -28,22 +28,28 @@ internal class CheeseFactory
 
     public int CheesesMissed { get; private set; }
 
-    // Spawn boundaries for cheese sprites
-    private int _minimumXSpawn, _maximumXSpawn, _minimumYSpawn, _maximumYSpawn ;
-    private SoundEffect _failEffect;
-
+    // Spawn boundaries for cheese sprites - cached to avoid recalculation
+    private readonly int _minimumXSpawn, _maximumXSpawn, _maximumYSpawn;
+    private int _minimumYSpawn;
+    private readonly SoundEffect _failEffect;
+    
+    // Cache for screen boundary checking
+    private readonly float _screenBottomBoundary;
 
     public CheeseFactory(int maxCheeses, Rectangle screenDimensions, Texture2D cheeseTexture, SoundEffect failEffect)
     {
         MaxCheeses = maxCheeses;
         ScreenDimensions = screenDimensions;
         CheeseTexture = cheeseTexture;
-        _minimumXSpawn = CheeseTexture.Width;
-        _maximumXSpawn = ScreenDimensions.Width - CheeseTexture.Width;
-        _minimumYSpawn = -(ScreenDimensions.Height * 2) + CheeseTexture.Height;
-        _maximumYSpawn = -CheeseTexture.Height;
+        _minimumXSpawn = CheeseTexture?.Width ?? 32;
+        _maximumXSpawn = ScreenDimensions.Width - (CheeseTexture?.Width ?? 32);
+        _minimumYSpawn = -(ScreenDimensions.Height * 2) + (CheeseTexture?.Height ?? 32);
+        _maximumYSpawn = -(CheeseTexture?.Height ?? 32);
 
         _failEffect = failEffect;
+        
+        // Cache screen boundary for performance
+        _screenBottomBoundary = ScreenDimensions.Height + (CheeseTexture?.Height / 2 ?? 16);
 
         CreateCheesesInRandomPositionsAboveScreen();
     }
@@ -53,11 +59,10 @@ internal class CheeseFactory
         for (int i = 0; i < MaxCheeses; i++)
         {
             var cheese = new Sprite(
-
-          GetRandomPositionAboveScreen(),
-                    CheeseTexture,
-                    .25f,
-                    Vector2.UnitY);
+                GetRandomPositionAboveScreen(),
+                CheeseTexture,
+                .25f,
+                Vector2.UnitY);
 
             cheeses.Add(cheese);
         }
@@ -71,9 +76,9 @@ internal class CheeseFactory
     private Vector2 GetRandomPositionAboveScreen()
     {
         return new Vector2(
-                        Random.Shared.Next(_minimumXSpawn, _maximumXSpawn),
-                        Random.Shared.Next(_minimumYSpawn, _maximumYSpawn)
-                    );
+            Random.Shared.Next(_minimumXSpawn, _maximumXSpawn),
+            Random.Shared.Next(_minimumYSpawn, _maximumYSpawn)
+        );
     }
 
     /// <summary>
@@ -83,13 +88,17 @@ internal class CheeseFactory
     /// <param name="gameTime"></param>
     public void Update(GameTime gameTime)
     {
-        foreach (var sprite in cheeses)
+        // Use for loop instead of foreach for better performance
+        for (int i = 0; i < cheeses.Count; i++)
         {
+            var sprite = cheeses[i];
             sprite.Update(gameTime);
-            if(sprite.Position.Y > ScreenDimensions.Height + CheeseTexture.Height/2)
+            
+            // Use cached boundary value
+            if (sprite.Position.Y > _screenBottomBoundary)
             {
                 CheesesMissed++;
-                _failEffect.Play();
+                _failEffect?.Play();
                 sprite.Position = GetRandomPositionAboveScreen();
             }
         }
@@ -97,16 +106,18 @@ internal class CheeseFactory
 
     /// <summary>
     /// Returns the cheese sprite at the given position, if any.
+    /// Early exit optimization for better performance.
     /// </summary>
     /// <param name="position">Which position to check at</param>
     /// <returns></returns>
     public Sprite CheckForCheeseAtPosition(Vector2 position)
     {
-        foreach (var cheese in cheeses)
+        // Use for loop for better performance and early exit
+        for (int i = 0; i < cheeses.Count; i++)
         {
+            var cheese = cheeses[i];
             if (cheese.GetBoundingRectangle().Contains(position))
             {
-                cheese.Position = GetRandomPositionAboveScreen();
                 return cheese;
             }
         }
@@ -116,20 +127,22 @@ internal class CheeseFactory
     public bool PopCheeseAtPosition(Vector2 position)
     {
         var cheese = CheckForCheeseAtPosition(position);
-        if(cheese != null)
+        if (cheese != null)
         {
             cheese.Position = GetRandomPositionAboveScreen();
             _minimumYSpawn += 3;
             _minimumYSpawn = Math.Min(_minimumYSpawn, -150);
+            return true;
         }
-        return cheese != null;
+        return false;
     }
 
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
-        foreach (var cheese in cheeses)
+        // Use for loop instead of foreach for better performance
+        for (int i = 0; i < cheeses.Count; i++)
         {
-            cheese.Draw(spriteBatch, gameTime);
+            cheeses[i].Draw(spriteBatch, gameTime);
         }
     }
 }

@@ -22,12 +22,14 @@ public class Sprite
     /// <summary>
     /// The image to draw for the sprite
     /// </summary>
-    public Texture2D Texture { get; set; }
+    public Texture2D Texture { get; private set; }
 
     /// <summary>
     /// The number of pixels to move each update
     /// </summary>
     public float Speed { get; set; }
+
+    Vector2 _quarterSize;
 
     #endregion
 
@@ -44,6 +46,7 @@ public class Sprite
         Direction = direction ?? Vector2.Zero; //if no direction was given, use no movement as default
         Texture = texture;
         Speed = speed;  
+        _quarterSize = new Vector2(Texture.Width, Texture.Height) / 2;
     }
 
     /// <summary>
@@ -62,23 +65,18 @@ public class Sprite
     /// <param name="gameTime">what the game time is</param>
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
-        //calculate how far up and to the left to position of the texture
-        //to center it on the Position
-        var quarterTextureSize = new Vector2(Texture.Width, Texture.Height) / 2;
-
-
         //uncomment the next line to add a shadow effect
         //spriteBatch.Draw(Texture, Position - quarterTextureSize + new Vector2(-5,5), Color.Black * 0.3f);
 
         //draw the texture centered on the position
-        spriteBatch.Draw(Texture, Position - quarterTextureSize, Color.White);
+        spriteBatch.Draw(Texture, Position - _quarterSize, Color.White);
     }
 
     public Rectangle GetBoundingRectangle()
     {
         return new Rectangle(
-            (int)(Position.X - Texture.Width / 2),
-            (int)(Position.Y - Texture.Height / 2),
+            (int)(Position.X - _quarterSize.X),
+            (int)(Position.Y - _quarterSize.Y),
             Texture.Width,
             Texture.Height);
     }
