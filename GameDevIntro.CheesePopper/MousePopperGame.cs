@@ -28,6 +28,7 @@ public class MousePopperGame : Game
         // Set resolution 
         _graphics.PreferredBackBufferWidth = 1280;
         _graphics.PreferredBackBufferHeight = 720;
+        _graphics.IsFullScreen = true;
         _graphics.ApplyChanges();
     }
 
@@ -56,7 +57,13 @@ public class MousePopperGame : Game
         _currentMouseState = Mouse.GetState();
 
         leftButtonClicked = (_currentMouseState.LeftButton == ButtonState.Pressed && _previousMouseState.LeftButton == ButtonState.Released);
+        var rightButtonClicked = (_currentMouseState.RightButton == ButtonState.Pressed && _previousMouseState.RightButton == ButtonState.Released);
 
+        if(rightButtonClicked)
+        {
+            _graphics.IsFullScreen = !_graphics.IsFullScreen;
+            _graphics.ApplyChanges();
+        }
 
         if (Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
@@ -86,7 +93,7 @@ public class MousePopperGame : Game
         }
 
 
-
+        _previousMouseState = _currentMouseState;
         base.Update(gameTime);
     }
 
@@ -127,7 +134,7 @@ public class MousePopperGame : Game
         var bobbingOffset = (float)(Math.Sin(gameTime.TotalGameTime.TotalSeconds * 3) * 20);
         _spriteBatch.Draw(_logoTexture, new Vector2(centerOfScreen.X - _logoTexture.Width / 2, centerOfScreen.Y - _logoTexture.Height / 2 + (float)bobbingOffset), Color.White);
 
-        _spriteBatch.DrawString(_defaultFont, "Click to begin game!", new Vector2(25, Window.ClientBounds.Height - 50), Color.Brown);
+        _spriteBatch.DrawString(_defaultFont, "Click to begin game! Right click to toggle full screen", new Vector2(25, Window.ClientBounds.Height - 50), Color.Brown);
     } 
     
     private void DrawGameScreen(GameTime gameTime)

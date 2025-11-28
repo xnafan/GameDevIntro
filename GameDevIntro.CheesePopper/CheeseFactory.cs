@@ -5,6 +5,12 @@ using System;
 using System.Collections.Generic;
 
 namespace GameDevIntro.CheesePopper;
+
+/// <summary>
+/// This class manages a collection of cheese sprites that move down the screen.
+/// When a cheese sprite moves below the screen, it is repositioned to a random 
+/// position above the screen.
+/// </summary>
 internal class CheeseFactory
 {
     // A list to hold all the cheese sprites managed by this factory
@@ -73,7 +79,7 @@ internal class CheeseFactory
         foreach (var sprite in cheeses)
         {
             sprite.Update(gameTime);
-            if(sprite.Position.Y > ScreenDimensions.Height)
+            if(sprite.Position.Y > ScreenDimensions.Height + CheeseTexture.Height)
             {
                 sprite.Position = GetRandomPositionAboveScreen();
             }
