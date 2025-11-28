@@ -24,6 +24,7 @@ public class MousePopperGame : Game
     private const int MAX_LIVES = 5;
     private int _livesLeft;
     private bool _rightButtonClicked, _leftButtonClicked;
+    private float _timeSinceGameOver;
     #endregion
 
     #region Initialization
@@ -104,6 +105,12 @@ public class MousePopperGame : Game
                 }
                 break;
             case GameState.GameOver:
+                _timeSinceGameOver += (float)gameTime.ElapsedGameTime.TotalSeconds;
+                if(_timeSinceGameOver < 1.0f)
+                {
+                    //wait a second before allowing restart
+                    break;
+                }
                 if (_leftButtonClicked)
                 {
                     NewGame();
@@ -124,6 +131,7 @@ public class MousePopperGame : Game
         _livesLeft = MAX_LIVES - _cheeseFactory.CheesesMissed;
         if (_livesLeft <= 0)
         {
+            _timeSinceGameOver = 0;
             CurrentState = GameState.GameOver;
         }
     }
