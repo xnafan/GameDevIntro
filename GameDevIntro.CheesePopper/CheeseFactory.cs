@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace GameDevIntro.CheesePopper;
 
@@ -15,7 +16,7 @@ namespace GameDevIntro.CheesePopper;
 public class CheeseFactory
 {
     // A list to hold all the cheese sprites managed by this factory
-    private readonly List<Sprite> cheeses = new();
+    private readonly List<Sprite> _cheeses = new();
 
     // The maximum number of cheese sprites allowed on screen
     public int MaxCheeses { get; set; }
@@ -63,9 +64,15 @@ public class CheeseFactory
                 CheeseTexture,
                 .25f,
                 Vector2.UnitY);
-
-            cheeses.Add(cheese);
+                
+            _cheeses.Add(cheese);
         }
+        SortCheeses();
+    }
+
+    private void SortCheeses()
+    {
+        _cheeses.Sort((a, b) => b.Position.Y.CompareTo(a.Position.Y));
     }
 
     /// <summary>
@@ -89,9 +96,9 @@ public class CheeseFactory
     public void Update(GameTime gameTime)
     {
         // Use for loop instead of foreach for better performance
-        for (int i = 0; i < cheeses.Count; i++)
+        for (int i = 0; i < _cheeses.Count; i++)
         {
-            var sprite = cheeses[i];
+            var sprite = _cheeses[i];
             sprite.Update(gameTime);
             
             if (sprite.Position.Y > _screenBottomBoundary)
@@ -99,6 +106,7 @@ public class CheeseFactory
                 CheesesMissed++;
                 _failEffect?.Play();
                 sprite.Position = GetRandomPositionAboveScreen();
+                SortCheeses();
             }
         }
     }
@@ -112,9 +120,9 @@ public class CheeseFactory
     public Sprite CheckForCheeseAtPosition(Vector2 position)
     {
         // Use for loop for better performance and early exit
-        for (int i = 0; i < cheeses.Count; i++)
+        for (int i = 0; i < _cheeses.Count; i++)
         {
-            var cheese = cheeses[i];
+            var cheese = _cheeses[i];
             if (cheese.GetBoundingRectangle().Contains(position))
             {
                 return cheese;
@@ -129,7 +137,13 @@ public class CheeseFactory
         if (cheese != null)
         {
             cheese.Position = GetRandomPositionAboveScreen();
-            _minimumYSpawn += 3;
+            SortCheeses();
+
+            // Gradually increase minimum Y spawn to make game harder
+            // because cheeses will spawn closer above the screen
+            _minimumYSpawn += 5;
+            Debug.Write(_minimumYSpawn);
+            // Cap the minimum Y spawn to avoid making it too hard
             _minimumYSpawn = Math.Min(_minimumYSpawn, -150);
             return true;
         }
@@ -138,10 +152,11 @@ public class CheeseFactory
 
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
-        // Use for loop instead of foreach for better performance
-        for (int i = 0; i < cheeses.Count; i++)
+        // reverse for loop to draw from back to front
+        // This ensures that cheeses lower on the screen are drawn over those higher up
+        for (int i = _cheeses.Count-1; i >= 0 ; i--)
         {
-            cheeses[i].Draw(spriteBatch, gameTime);
+            _cheeses[i].Draw(spriteBatch, gameTime);
         }
     }
 }
