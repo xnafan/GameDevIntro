@@ -1,20 +1,24 @@
-﻿using Microsoft.Xna.Framework;
+﻿using GameDevIntro.CheesePopper;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
-
 namespace GameDevIntro.MousePopper;
 public class MousePopperGame : Game
 {
-    public enum GameState{TitleScreen, Playing, GameOver}
+    #region Variables and enums
+    public enum GameState { TitleScreen, Playing, GameOver }
     public GameState CurrentState { get; set; }
 
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
-    private Texture2D _cheeseTexture, _logoTexture;
+    private Texture2D _cheeseTexture, _logoTexture, _crosshairsTexture;
     private MouseState _currentMouseState, _previousMouseState;
     private SpriteFont _defaultFont;
+    private CheeseFactory _cheeseFactory;
+    #endregion
 
+    #region Initialization
     public MousePopperGame()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -31,13 +35,23 @@ public class MousePopperGame : Game
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         _logoTexture = Content.Load<Texture2D>("graphics/cheesePopper_logo_small");
-        _cheeseTexture = Content.Load<Texture2D>("graphics/cheese_512px");
+        _cheeseTexture = Content.Load<Texture2D>("graphics/cheese");
         _defaultFont = Content.Load<SpriteFont>("fonts/DefaultFont");
-
+        _crosshairsTexture = Content.Load<Texture2D>("graphics/crosshairs");
+        NewGame();
     }
 
+    private void NewGame()
+    {
+      _cheeseFactory = new CheeseFactory(10, GraphicsDevice.Viewport.Bounds, _cheeseTexture);
+    }
+
+    #endregion
+
+    #region Update and related
     protected override void Update(GameTime gameTime)
     {
+        _cheeseFactory.Update(gameTime);
         var leftButtonClicked = false;
         _currentMouseState = Mouse.GetState();
 
@@ -50,7 +64,7 @@ public class MousePopperGame : Game
         switch (CurrentState)
         {
             case GameState.TitleScreen:
-                if(leftButtonClicked)
+                if (leftButtonClicked)
                 {
                     CurrentState = GameState.Playing;
                 }
@@ -72,6 +86,9 @@ public class MousePopperGame : Game
         base.Update(gameTime);
     }
 
+    #endregion
+
+    # region Update and related
     protected override void Draw(GameTime gameTime)
     {
         base.Draw(gameTime);
@@ -96,17 +113,9 @@ public class MousePopperGame : Game
         }
 
         // Draw game elements here
-      
+
         _spriteBatch.End();
-
-
     }
-
-    private void DrawGameScreen(GameTime gameTime)
-    {
-        _spriteBatch.Draw(_cheeseTexture,new Vector2(_currentMouseState.X, _currentMouseState.Y), Color.White);
-    }
-
     private void DrawTitleScreen(GameTime gameTime)
     {
         var centerOfScreen = new Vector2(Window.ClientBounds.Width, Window.ClientBounds.Height) / 2;
@@ -115,5 +124,19 @@ public class MousePopperGame : Game
         _spriteBatch.Draw(_logoTexture, new Vector2(centerOfScreen.X - _logoTexture.Width / 2, centerOfScreen.Y - _logoTexture.Height / 2 + (float)bobbingOffset), Color.White);
 
         _spriteBatch.DrawString(_defaultFont, "Click to begin game!", new Vector2(25, Window.ClientBounds.Height - 50), Color.Brown);
+    } 
+    
+    private void DrawGameScreen(GameTime gameTime)
+    {
+        _cheeseFactory.Draw(_spriteBatch, gameTime);
+        float mouseCursorScale = 1;
+        if (_currentMouseState.LeftButton == ButtonState.Pressed)
+        {
+            mouseCursorScale = 0.8f;
+        }
+
+        //draw the crosshairs slightly smaller when the mouse button is down
+        _spriteBatch.Draw(_crosshairsTexture, new Vector2(_currentMouseState.X - (_crosshairsTexture.Width * mouseCursorScale) / 2, _currentMouseState.Y - (_crosshairsTexture.Height * mouseCursorScale) / 2), null, Color.White, 0f, Vector2.Zero, mouseCursorScale, SpriteEffects.None, 0f);
     }
+    #endregion
 }
