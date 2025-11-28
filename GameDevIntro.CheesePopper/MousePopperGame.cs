@@ -70,6 +70,10 @@ public class MousePopperGame : Game
                 }
                 break;
             case GameState.Playing:
+                if (leftButtonClicked)
+                {
+                    _cheeseFactory.PopCheeseAtPosition(new Vector2(_currentMouseState.X, _currentMouseState.Y));
+                }
                 break;
             case GameState.GameOver:
                 if (leftButtonClicked)

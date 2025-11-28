@@ -80,6 +80,29 @@ internal class CheeseFactory
         }
     }
 
+    public Sprite CheckForCheeseAtPosition(Vector2 position)
+    {
+        foreach (var cheese in cheeses)
+        {
+            if (cheese.GetBoundingRectangle().Contains(position))
+            {
+                cheese.Position = GetRandomPositionAboveScreen();
+                return cheese;
+            }
+        }
+        return null;
+    }
+
+    public bool PopCheeseAtPosition(Vector2 position)
+    {
+        var cheese = CheckForCheeseAtPosition(position);
+        if(cheese != null)
+        {
+            cheese.Position = GetRandomPositionAboveScreen();
+        }
+        return cheese != null;
+    }
+
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
         foreach (var cheese in cheeses)

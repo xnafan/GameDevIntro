@@ -73,4 +73,13 @@ public class Sprite
         //draw the texture centered on the position
         spriteBatch.Draw(Texture, Position - quarterTextureSize, Color.White);
     }
+
+    public Rectangle GetBoundingRectangle()
+    {
+        return new Rectangle(
+            (int)(Position.X - Texture.Width / 2),
+            (int)(Position.Y - Texture.Height / 2),
+            Texture.Width,
+            Texture.Height);
+    }
 }
