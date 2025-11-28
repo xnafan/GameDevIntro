@@ -78,6 +78,11 @@ public class CheesePopperGame : Game
     #region Update and related
     protected override void Update(GameTime gameTime)
     {
+        //pause the game if not active
+        if (!IsActive)
+        {
+            return;
+        }
         UpdateButtonStates();
         ToggleFullScreenIfRightButtonClicked();
         ExitGameIfEscapeKeyPressed();
@@ -90,6 +95,7 @@ public class CheesePopperGame : Game
                     CurrentState = GameState.Playing;
                 }
                 break;
+
             case GameState.Playing:
                 _cheeseFactory.Update(gameTime);
                 UpdateLivesLeft();
@@ -103,6 +109,7 @@ public class CheesePopperGame : Game
                     }
                 }
                 break;
+
             case GameState.GameOver:
                 _timeSinceGameOver += (float)gameTime.ElapsedGameTime.TotalSeconds;
                 if (_timeSinceGameOver < 1.0f)
@@ -116,6 +123,7 @@ public class CheesePopperGame : Game
                     CurrentState = GameState.Playing;
                 }
                 break;
+
             default:
                 break;
         }
@@ -160,7 +168,7 @@ public class CheesePopperGame : Game
     #endregion
 
     #region Draw and related
-    
+
     protected override void Draw(GameTime gameTime)
     {
         base.Draw(gameTime);
