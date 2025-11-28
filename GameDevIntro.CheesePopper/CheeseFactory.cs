@@ -119,6 +119,8 @@ internal class CheeseFactory
         if(cheese != null)
         {
             cheese.Position = GetRandomPositionAboveScreen();
+            _minimumYSpawn += 3;
+            _minimumYSpawn = Math.Min(_minimumYSpawn, -150);
         }
         return cheese != null;
     }
