@@ -44,6 +44,7 @@ public class MousePopperGame : Game
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
+        //load textures
         _logoTexture = Content.Load<Texture2D>("graphics/cheesePopper_logo_small");
         _cheeseTexture = Content.Load<Texture2D>("graphics/cheese");
         _defaultFont = Content.Load<SpriteFont>("fonts/DefaultFont");
@@ -52,9 +53,11 @@ public class MousePopperGame : Game
         _gameOverTexture = Content.Load<Texture2D>("graphics/gameover");
         _pointsTexture = Content.Load<Texture2D>("graphics/points_128px");
         
+        //load sound effects
         _popSoundEffect = Content.Load<SoundEffect>("Sounds/pop");
         _failEffect = Content.Load<SoundEffect>("Sounds/fail");
 
+        //load music
         _backgroundMusic = Content.Load<Song>("Sounds/music");
 
         NewGame();
@@ -150,7 +153,7 @@ public class MousePopperGame : Game
 
     #endregion
 
-    #region Update and related
+    #region Draw and related
     protected override void Draw(GameTime gameTime)
     {
         base.Draw(gameTime);
@@ -175,7 +178,7 @@ public class MousePopperGame : Game
                 break;
         }
 
-        // Draw game elements here
+        DrawCrosshairs();
 
         _spriteBatch.End();
     }
@@ -206,7 +209,10 @@ public class MousePopperGame : Game
         _cheeseFactory.Draw(_spriteBatch, gameTime);
         DrawLivesLeft(gameTime);
         DrawPoints(gameTime);
+    }
 
+    private void DrawCrosshairs()
+    {
         float mouseCursorScale = 1;
         if (_currentMouseState.LeftButton == ButtonState.Pressed)
         {
