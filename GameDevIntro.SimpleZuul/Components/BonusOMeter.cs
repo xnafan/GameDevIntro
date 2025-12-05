@@ -46,8 +46,15 @@ internal class BonusOMeter : Sprite
         var currentDestinationRect = new Rectangle(fillLeft, fillBottom - currentFilledHeight, fillWidth, currentFilledHeight);
         var actualDestinationRect = new Rectangle(fillLeft, fillBottom - actualFilledHeight, fillWidth, actualFilledHeight);
 
-        spriteBatch.Draw(_filledTexture, actualDestinationRect, Color.LightGreen* 0.4f);
+        spriteBatch.Draw(_filledTexture, actualDestinationRect, Color.LightGreen* 0.6f);
         spriteBatch.Draw(_filledTexture, currentDestinationRect,Color.Green);
         spriteBatch.Draw(Texture, new Rectangle((int)Position.X, (int)Position.Y, Texture.Width, Texture.Height), Color.White);
+    }
+
+    internal void Reset()
+    {
+        Score = 0;
+        _currentDisplayScore = 0;
+
     }
 }

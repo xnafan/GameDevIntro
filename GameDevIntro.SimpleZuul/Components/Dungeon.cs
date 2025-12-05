@@ -17,6 +17,7 @@ internal class Dungeon : IEnumerable<Tile>
 
     public int Width { get => Tiles.GetLength(0); }
     public int Height { get => Tiles.GetLength(1); }
+    public int ItemsLeft { get; set; }
 
     #endregion
     public Dungeon(int width, int height, Texture2D wallTiles, Texture2D playerTiles)

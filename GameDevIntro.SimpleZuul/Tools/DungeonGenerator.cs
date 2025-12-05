@@ -237,18 +237,22 @@ internal static class DungeonGenerator
                     if (roll < 2) // 2% chance for Dragon
                     {
                         dungeon.Tiles[x, y].Type = Tile.TileType.Dragon;
+                        dungeon.ItemsLeft++;
                     }
                     else if (roll < 8) // 6% chance for Skeleton
                     {
                         dungeon.Tiles[x, y].Type = Tile.TileType.Skeleton;
+                        dungeon.ItemsLeft++;
                     }
                     else if (roll < 20) // 12% chance for Slime
                     {
                         dungeon.Tiles[x, y].Type = Tile.TileType.Slime;
+                        dungeon.ItemsLeft++;
                     }
                     else if (roll < 25) // 5% chance for Chest
                     {
                         dungeon.Tiles[x, y].Type = Tile.TileType.Chest;
+                        dungeon.ItemsLeft++;
                     }
                 }
             }
