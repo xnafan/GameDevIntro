@@ -91,7 +91,7 @@ public class ZuulGame : Game
         {
             Exit();
         }
-        if (_currentKeyboardState.IsKeyDown(Keys.F5))
+        if (_currentKeyboardState.IsKeyDown(Keys.F5) && _previousKeyboardState.IsKeyUp(Keys.F5) )
         {
             NewGame();
         }
@@ -239,7 +239,7 @@ public class ZuulGame : Game
         var scoreOffset = Vector2.One * 20;
         var textSize = _defaultFont.MeasureString(scoreText);
         _spriteBatch.DrawString(_defaultFont, scoreText, new Vector2(_graphics.PreferredBackBufferWidth ,_graphics.PreferredBackBufferHeight) - textSize - scoreOffset, Color.White);
-
+        _spriteBatch.DrawString(_defaultFont, "F5 - New Game | F11 - Toggle Fullscreen | Esc - Quit", new Vector2(20, _graphics.PreferredBackBufferHeight - 40), Color.White);
         _spriteBatch.End();
     }
 
