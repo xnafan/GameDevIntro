@@ -6,26 +6,10 @@ namespace GameDevIntro.SimpleZuul.Model;
 internal class Tile
 {
     Texture2D _spriteSheet;
-    private static void GenerateTileColors()
-    {
-        //generate 8 colors from white to black
-        _tileColors = new Color[8];
-        for (int i = 0; i < 8; i++)
-        {
-            int shade = 255 - (i * 32);
-            _tileColors[i] = new Color(shade, shade, shade);
-        }
-    }
-    private static Color[] _tileColors;
     
     public enum TileType {Empty, Wall, Slime, Skeleton, Dragon, Chest }
 
     public TileType Type { get; set; }
-
-    static Tile()
-    {
-        GenerateTileColors();
-    }
 
     public Tile(TileType type, Texture2D spriteSheet)
     {

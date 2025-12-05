@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-namespace GameDevIntro.GameBase.Model;
+namespace GameDevIntro.SimpleZuul.Components;
 
 /// <summary>
 /// A spirite is a movable object with a texture (image) to draw
@@ -60,7 +60,7 @@ public class Sprite
     /// </summary>
     /// <param name="spriteBatch">The spritebatch to draw to</param>
     /// <param name="gameTime">what the game time is</param>
-    public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
+    public virtual void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
         //calculate how far up and to the left to position of the texture
         //to center it on the Position

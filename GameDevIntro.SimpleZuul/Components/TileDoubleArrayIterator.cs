@@ -1,11 +1,12 @@
-﻿using System;
+﻿using GameDevIntro.SimpleZuul.Model;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GameDevIntro.SimpleZuul.Model;
+namespace GameDevIntro.SimpleZuul.Components;
 internal class TileDoubleArrayIterator : IEnumerator<Tile>
 {
     private Tile[,] _tilesToIterateOver;

@@ -1,4 +1,5 @@
-﻿using GameDevIntro.SimpleZuul.Model;
+﻿using GameDevIntro.SimpleZuul.Components;
+using GameDevIntro.SimpleZuul.Model;
 using GameDevIntro.SimpleZuul.Tools;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
@@ -7,6 +8,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace GameDevIntro.SimpleZuul;
 public class ZuulGame : Game
@@ -14,7 +16,7 @@ public class ZuulGame : Game
     public enum GameState { TitleScreen, Playing, GameOver }
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
-    private Texture2D _titleScreenTexture, _tileSpriteSheet, _wallTileSheet, _knightSpriteSheet, _logoSmall;
+    private Texture2D _titleScreenTexture, _tileSpriteSheet, _wallTileSheet, _knightSpriteSheet, _logoSmall, _bonusOmeterTexture;
     private KeyboardState _currentKeyboardState, _previousKeyboardState;
     private Dungeon _dungeon;
     private readonly int _dungeonWidth = 25, _dungeonHeight = 15;
@@ -24,8 +26,11 @@ public class ZuulGame : Game
     private List<SoundEffect> _swordSounds = new(), _deathSounds = new();
     private SoundEffect _chestOpen;
     private int _score;
+    private float _timeLeft;
+    private List<TextSprite> _floatingTexts = new();
     public GameState CurrentState { get; set; }
     private float _elapsedTimeSinceLastScoreDecrement = 0f;
+    private BonusOMeter _bonusOMeter;
     public ZuulGame()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -33,7 +38,7 @@ public class ZuulGame : Game
         IsMouseVisible = true;
         _graphics.PreferredBackBufferWidth = 1920;
         _graphics.PreferredBackBufferHeight = 1080;
-        _graphics.IsFullScreen = true;
+//        _graphics.IsFullScreen = true;
         IsMouseVisible = false;
     }
 
@@ -46,6 +51,7 @@ public class ZuulGame : Game
         _wallTileSheet = Content.Load<Texture2D>("Graphics/wall_tiles");
         _knightSpriteSheet = Content.Load<Texture2D>("Graphics/knight_spritesheet");
         _logoSmall = Content.Load<Texture2D>("Graphics/Zuul_logo_small");
+        _bonusOmeterTexture = Content.Load<Texture2D>("Graphics/bonusometer");
 
         _defaultFont = Content.Load<SpriteFont>("Fonts/DefaultFont");
 
@@ -71,7 +77,8 @@ public class ZuulGame : Game
             (_graphics.PreferredBackBufferHeight - (_dungeonHeight * _tileSpriteSheet.Height)) 
         );
 
-        
+        _bonusOMeter = new BonusOMeter(new Vector2(60, 260), _bonusOmeterTexture, GraphicsDevice, 300);
+
         MediaPlayer.IsRepeating = true;
         PlayRandomMusic();
     }
@@ -88,6 +95,12 @@ public class ZuulGame : Game
         {
             NewGame();
         }
+        if(_currentKeyboardState.IsKeyDown(Keys.F11) && !_previousKeyboardState.IsKeyDown(Keys.F11))
+        {
+            _graphics.IsFullScreen = !_graphics.IsFullScreen;
+            _graphics.ApplyChanges();
+        }
+
 
         base.Update(gameTime);
         switch (CurrentState)
@@ -102,6 +115,10 @@ public class ZuulGame : Game
             case GameState.Playing:
                 DecrementScore(gameTime);
                 MovePlayerBasedOnKeyboardState();
+                _floatingTexts.ForEach(ft => ft.Update(gameTime));
+                _floatingTexts.RemoveAll(ft => ft.IsExpired);
+                _bonusOMeter.Update(_score,gameTime);
+                Debug.WriteLine(_floatingTexts.Count);
                 break;
             case GameState.GameOver:
                 break;
@@ -117,7 +134,7 @@ public class ZuulGame : Game
         if (_elapsedTimeSinceLastScoreDecrement >= 1f)
         {
             _score = Math.Max(0, _score - 1);
-            _elapsedTimeSinceLastScoreDecrement = 0f;
+            _elapsedTimeSinceLastScoreDecrement -= 1f;
         }
     }
 
@@ -147,8 +164,15 @@ public class ZuulGame : Game
         switch (tileType)
         {
             case Tile.TileType.Slime:
+                _score += 15;
+                PlayRandomSwordSound();
+                break;
             case Tile.TileType.Skeleton:
+                _score += 25;
+                PlayRandomSwordSound();
+                break;
             case Tile.TileType.Dragon:
+                _score += 30;
                 PlayRandomSwordSound();
                 break;
             default:
@@ -158,6 +182,7 @@ public class ZuulGame : Game
         {
             _chestOpen.Play();
             _score += 10;
+            _floatingTexts.Add(new TextSprite("+10 sec", _defaultFont, new Vector2(_dungeon.PlayerPosition.X * _knightSpriteSheet.Height, _dungeon.PlayerPosition.Y * _knightSpriteSheet.Height) + _topLeftOfDungeon + Vector2.UnitY * -32, new Vector2(0,-1) , Color.Gold));
         }
     }
 
@@ -175,7 +200,8 @@ public class ZuulGame : Game
     {
         _dungeon = DungeonGenerator.GenerateDungeon(_dungeonWidth, _dungeonHeight, _tileSpriteSheet, _knightSpriteSheet);
         PlayRandomMusic();
-        _score = 100;
+        _score = 0;
+        _timeLeft = 60;
         CurrentState = GameState.Playing;
     }
 
@@ -199,13 +225,20 @@ public class ZuulGame : Game
             case GameState.Playing:
                 _dungeon.Draw(_spriteBatch, gameTime, _topLeftOfDungeon);
                 DrawMiniLogo(gameTime);
+                _bonusOMeter.Draw(_spriteBatch, gameTime);
+                _floatingTexts.ForEach(ft => ft.Draw(_spriteBatch, gameTime));
                 break;
             case GameState.GameOver:
                 break;
             default:
                 break;
         }
-        _spriteBatch.DrawString(_defaultFont, $"Score: {_score}", new Vector2(20, 20), Color.White);
+
+        // draw the score in the bottom right corner
+        var scoreText = $"Score: {_score}";
+        var scoreOffset = Vector2.One * 20;
+        var textSize = _defaultFont.MeasureString(scoreText);
+        _spriteBatch.DrawString(_defaultFont, scoreText, new Vector2(_graphics.PreferredBackBufferWidth ,_graphics.PreferredBackBufferHeight) - textSize - scoreOffset, Color.White);
 
         _spriteBatch.End();
     }

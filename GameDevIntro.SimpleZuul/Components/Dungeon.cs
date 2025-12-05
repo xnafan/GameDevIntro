@@ -1,10 +1,11 @@
-﻿using Microsoft.Xna.Framework;
+﻿using GameDevIntro.SimpleZuul.Model;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace GameDevIntro.SimpleZuul.Model;
+namespace GameDevIntro.SimpleZuul.Components;
 internal class Dungeon : IEnumerable<Tile>
 {
     #region Properties
@@ -28,18 +29,18 @@ internal class Dungeon : IEnumerable<Tile>
 
     private void GenerateTileColors()
     {
-        //generate 8 colors from white to black
-        int numShades = 2;
+        //generate colors from white to black
+        int numShades = 4;
         _tileColors = new Color[numShades+1];
         for (int i = 0; i < numShades; i++)
         {
-            int shade = 255 - (i * (255/numShades));
+            int shade = 255 - i * (255/numShades);
             _tileColors[i] = new Color(shade, shade, shade);
         }
         _tileColors[numShades] = Color.Black;
     }
 
-    public IEnumerator<Tile> GetEnumerator() => new TileDoubleArrayIterator(this.Tiles);
+    public IEnumerator<Tile> GetEnumerator() => new TileDoubleArrayIterator(Tiles);
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime, Vector2 topLeft)

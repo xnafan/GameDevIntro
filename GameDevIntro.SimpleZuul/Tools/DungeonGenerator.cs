@@ -1,4 +1,5 @@
-﻿using GameDevIntro.SimpleZuul.Model;
+﻿using GameDevIntro.SimpleZuul.Components;
+using GameDevIntro.SimpleZuul.Model;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -13,6 +14,15 @@ internal static class DungeonGenerator
         new Point(2, 0),   // Right
         new Point(0, -2),  // Up
         new Point(0, 2)    // Down
+    };
+
+    // Cardinal directions for immediate player area excavation
+    private static readonly Point[] CardinalDirections = new[]
+    {
+        new Point(-1, 0),  // Left
+        new Point(1, 0),   // Right
+        new Point(0, -1),  // Up
+        new Point(0, 1)    // Down
     };
 
     public static Dungeon GenerateDungeon(int width, int height, Texture2D spriteSheet, Texture2D playerSpriteSheet)
@@ -45,8 +55,8 @@ internal static class DungeonGenerator
         
         dungeon.PlayerPosition = new Point(startX, startY);
 
-        // Breadth-first backtracking maze generation
-        GenerateMazeUsingBreadthFirst(dungeon, startX, startY);
+        // Random depth-first maze generation
+        GenerateRandomMaze(dungeon, startX, startY);
 
         // Poke random holes in walls to connect tunnels
         PokeRandomHoles(dungeon);
@@ -54,6 +64,154 @@ internal static class DungeonGenerator
         AddContent(dungeon);
 
         return dungeon;
+    }
+
+    private static void GenerateRandomMaze(Dungeon dungeon, int startX, int startY)
+    {
+        var random = new Random();
+        var stack = new Stack<Point>();
+        var visited = new bool[dungeon.Width, dungeon.Height];
+
+        // Mark starting position as visited and carve it
+        visited[startX, startY] = true;
+        dungeon.Tiles[startX, startY].Type = Tile.TileType.Empty;
+
+        // Excavate the four cardinal direction tiles from player position to ensure mobility
+        foreach (var direction in CardinalDirections)
+        {
+            int adjacentX = startX + direction.X;
+            int adjacentY = startY + direction.Y;
+            
+            // Only excavate if within bounds (not touching outer walls)
+            if (adjacentX > 0 && adjacentX < dungeon.Width - 1 && 
+                adjacentY > 0 && adjacentY < dungeon.Height - 1)
+            {
+                dungeon.Tiles[adjacentX, adjacentY].Type = Tile.TileType.Empty;
+                visited[adjacentX, adjacentY] = true;
+            }
+        }
+
+        // Start with the initial position
+        stack.Push(new Point(startX, startY));
+
+        while (stack.Count > 0)
+        {
+            var current = stack.Peek();
+            
+            // Get all unvisited neighbors
+            var unvisitedNeighbors = new List<Point>();
+            
+            foreach (var direction in Directions)
+            {
+                var neighbor = new Point(current.X + direction.X, current.Y + direction.Y);
+                if (IsValidCell(dungeon, neighbor.X, neighbor.Y) && !visited[neighbor.X, neighbor.Y])
+                {
+                    unvisitedNeighbors.Add(neighbor);
+                }
+            }
+
+            if (unvisitedNeighbors.Count > 0)
+            {
+                // Randomly choose one unvisited neighbor
+                var chosenNeighbor = unvisitedNeighbors[random.Next(unvisitedNeighbors.Count)];
+                
+                // Mark as visited and carve
+                visited[chosenNeighbor.X, chosenNeighbor.Y] = true;
+                dungeon.Tiles[chosenNeighbor.X, chosenNeighbor.Y].Type = Tile.TileType.Empty;
+                
+                // Carve the wall between current and chosen neighbor
+                var wallX = (current.X + chosenNeighbor.X) / 2;
+                var wallY = (current.Y + chosenNeighbor.Y) / 2;
+                dungeon.Tiles[wallX, wallY].Type = Tile.TileType.Empty;
+                
+                // Push the chosen neighbor onto the stack
+                stack.Push(chosenNeighbor);
+            }
+            else
+            {
+                // No unvisited neighbors, backtrack
+                stack.Pop();
+            }
+        }
+
+        // Ensure all reachable areas are carved (handle disconnected regions)
+        for (int attempts = 0; attempts < 5; attempts++)
+        {
+            bool foundUnvisited = false;
+            
+            for (int x = 1; x < dungeon.Width - 1; x += 2)
+            {
+                for (int y = 1; y < dungeon.Height - 1; y += 2)
+                {
+                    if (!visited[x, y])
+                    {
+                        // Found an unvisited cell, start a new branch from here
+                        visited[x, y] = true;
+                        dungeon.Tiles[x, y].Type = Tile.TileType.Empty;
+                        
+                        // Try to connect to an existing path
+                        var nearbyVisited = new List<Point>();
+                        foreach (var direction in Directions)
+                        {
+                            var neighbor = new Point(x + direction.X, y + direction.Y);
+                            if (IsValidCell(dungeon, neighbor.X, neighbor.Y) && visited[neighbor.X, neighbor.Y])
+                            {
+                                nearbyVisited.Add(neighbor);
+                            }
+                        }
+                        
+                        if (nearbyVisited.Count > 0)
+                        {
+                            // Connect to a random nearby visited cell
+                            var connection = nearbyVisited[random.Next(nearbyVisited.Count)];
+                            var wallX = (x + connection.X) / 2;
+                            var wallY = (y + connection.Y) / 2;
+                            dungeon.Tiles[wallX, wallY].Type = Tile.TileType.Empty;
+                        }
+                        
+                        // Continue maze generation from this new point
+                        stack.Push(new Point(x, y));
+                        while (stack.Count > 0)
+                        {
+                            var current = stack.Peek();
+                            var unvisitedNeighbors = new List<Point>();
+                            
+                            foreach (var direction in Directions)
+                            {
+                                var neighbor = new Point(current.X + direction.X, current.Y + direction.Y);
+                                if (IsValidCell(dungeon, neighbor.X, neighbor.Y) && !visited[neighbor.X, neighbor.Y])
+                                {
+                                    unvisitedNeighbors.Add(neighbor);
+                                }
+                            }
+
+                            if (unvisitedNeighbors.Count > 0)
+                            {
+                                var chosenNeighbor = unvisitedNeighbors[random.Next(unvisitedNeighbors.Count)];
+                                visited[chosenNeighbor.X, chosenNeighbor.Y] = true;
+                                dungeon.Tiles[chosenNeighbor.X, chosenNeighbor.Y].Type = Tile.TileType.Empty;
+                                
+                                var wallX = (current.X + chosenNeighbor.X) / 2;
+                                var wallY = (current.Y + chosenNeighbor.Y) / 2;
+                                dungeon.Tiles[wallX, wallY].Type = Tile.TileType.Empty;
+                                
+                                stack.Push(chosenNeighbor);
+                            }
+                            else
+                            {
+                                stack.Pop();
+                            }
+                        }
+                        
+                        foundUnvisited = true;
+                        break;
+                    }
+                }
+                if (foundUnvisited) break;
+            }
+            
+            if (!foundUnvisited) break; // No more unvisited cells
+        }
     }
 
     private static void AddContent(Dungeon dungeon)
@@ -91,79 +249,6 @@ internal static class DungeonGenerator
                     else if (roll < 25) // 5% chance for Chest
                     {
                         dungeon.Tiles[x, y].Type = Tile.TileType.Chest;
-                    }
-                }
-            }
-        }
-    }
-
-    private static void GenerateMazeUsingBreadthFirst(Dungeon dungeon, int startX, int startY)
-    {
-        var random = new Random();
-        var queue = new Queue<Point>();
-        var visited = new bool[dungeon.Width, dungeon.Height];
-
-        // Mark starting position as visited and carve it
-        visited[startX, startY] = true;
-        dungeon.Tiles[startX, startY].Type = Tile.TileType.Empty;
-
-        // Add all four directions from starting point to queue
-        var shuffledDirections = new List<Point>(Directions);
-        ShuffleList(shuffledDirections, random);
-
-        foreach (var direction in shuffledDirections)
-        {
-            var nextPoint = new Point(startX + direction.X, startY + direction.Y);
-            if (IsValidCell(dungeon, nextPoint.X, nextPoint.Y) && !visited[nextPoint.X, nextPoint.Y])
-            {
-                queue.Enqueue(nextPoint);
-            }
-        }
-
-        // Process queue until empty
-        while (queue.Count > 0)
-        {
-            var current = queue.Dequeue();
-
-            // Skip if already visited
-            if (visited[current.X, current.Y])
-                continue;
-
-            // Find unvisited neighbors that could connect to this cell
-            var possibleConnections = new List<Point>();
-            
-            foreach (var direction in Directions)
-            {
-                var neighbor = new Point(current.X - direction.X, current.Y - direction.Y);
-                if (IsValidCell(dungeon, neighbor.X, neighbor.Y) && visited[neighbor.X, neighbor.Y])
-                {
-                    possibleConnections.Add(neighbor);
-                }
-            }
-
-            // If we can connect to at least one visited cell, carve this cell
-            if (possibleConnections.Count > 0)
-            {
-                // Mark as visited and carve
-                visited[current.X, current.Y] = true;
-                dungeon.Tiles[current.X, current.Y].Type = Tile.TileType.Empty;
-
-                // Choose a random connection and carve the path
-                var connection = possibleConnections[random.Next(possibleConnections.Count)];
-                var wallX = (current.X + connection.X) / 2;
-                var wallY = (current.Y + connection.Y) / 2;
-                dungeon.Tiles[wallX, wallY].Type = Tile.TileType.Empty;
-
-                // Add unvisited neighbors to queue
-                var newDirections = new List<Point>(Directions);
-                ShuffleList(newDirections, random);
-
-                foreach (var direction in newDirections)
-                {
-                    var nextPoint = new Point(current.X + direction.X, current.Y + direction.Y);
-                    if (IsValidCell(dungeon, nextPoint.X, nextPoint.Y) && !visited[nextPoint.X, nextPoint.Y])
-                    {
-                        queue.Enqueue(nextPoint);
                     }
                 }
             }
