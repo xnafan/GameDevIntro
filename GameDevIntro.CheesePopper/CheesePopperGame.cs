@@ -30,14 +30,16 @@ public class CheesePopperGame : Game
     #region Initialization
     public CheesePopperGame()
     {
-        _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
+
+
+        _graphics = new GraphicsDeviceManager(this);
         IsMouseVisible = false;
 
         // Set resolution 
         _graphics.PreferredBackBufferWidth = 1280;
         _graphics.PreferredBackBufferHeight = 720;
-        _graphics.IsFullScreen = false;
+        _graphics.IsFullScreen = true;
         _graphics.ApplyChanges();
     }
 
@@ -48,11 +50,13 @@ public class CheesePopperGame : Game
         //load textures
         _logoTexture = Content.Load<Texture2D>("graphics/cheesePopper_logo_small");
         _cheeseTexture = Content.Load<Texture2D>("graphics/cheese");
-        _defaultFont = Content.Load<SpriteFont>("fonts/DefaultFont");
         _crosshairsTexture = Content.Load<Texture2D>("graphics/crosshairs");
         _heartTexture = Content.Load<Texture2D>("graphics/heart");
         _gameOverTexture = Content.Load<Texture2D>("graphics/gameover");
         _pointsTexture = Content.Load<Texture2D>("graphics/points_128px");
+
+        //load font
+        _defaultFont = Content.Load<SpriteFont>("fonts/DefaultFont");
 
         //load sound effects
         _popSoundEffect = Content.Load<SoundEffect>("Sounds/pop");
