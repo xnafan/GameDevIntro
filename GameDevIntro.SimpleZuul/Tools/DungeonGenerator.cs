@@ -51,13 +51,15 @@ internal static class DungeonGenerator
         // Poke random holes in walls to connect tunnels
         PokeRandomHoles(dungeon);
 
-        AddMonsters(dungeon);
+        AddContent(dungeon);
 
         return dungeon;
     }
 
-    private static void AddMonsters(Dungeon dungeon)
+    private static void AddContent(Dungeon dungeon)
     {
+        //TODO: More sophisticated content placement
+        // chests at the end of corridors
         for (int x = 0; x < dungeon.Width; x++)
         {
             for (int y = 0; y < dungeon.Height; y++)

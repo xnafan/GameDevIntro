@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -7,7 +8,7 @@ namespace GameDevIntro.SimpleZuul.Model;
 internal class Dungeon : IEnumerable<Tile>
 {
     #region Properties
-
+    private static Color[] _tileColors;
     private Texture2D _wallTiles, _playerTiles;
     public Tile[,] Tiles { get; set; }
     public Point PlayerPosition { get; set; }
@@ -22,6 +23,20 @@ internal class Dungeon : IEnumerable<Tile>
         Tiles = new Tile[width, height];
         _wallTiles = wallTiles;
         _playerTiles = playerTiles;
+        GenerateTileColors();
+    }
+
+    private void GenerateTileColors()
+    {
+        //generate 8 colors from white to black
+        int numShades = 2;
+        _tileColors = new Color[numShades+1];
+        for (int i = 0; i < numShades; i++)
+        {
+            int shade = 255 - (i * (255/numShades));
+            _tileColors[i] = new Color(shade, shade, shade);
+        }
+        _tileColors[numShades] = Color.Black;
     }
 
     public IEnumerator<Tile> GetEnumerator() => new TileDoubleArrayIterator(this.Tiles);
@@ -33,7 +48,8 @@ internal class Dungeon : IEnumerable<Tile>
         {
             for (int y = 0; y < Height; y++)
             {
-                Tiles[x, y].Draw(spriteBatch, gameTime,topLeft + new Vector2(x * _wallTiles.Height, y * _wallTiles.Height));
+                var colorIndex = Math.Clamp((int)(Vector2.Distance(new Vector2(PlayerPosition.X, PlayerPosition.Y), new Vector2(x, y)) / 2), 0, _tileColors.Length - 1);
+                Tiles[x, y].Draw(spriteBatch, gameTime,topLeft + new Vector2(x * _wallTiles.Height, y * _wallTiles.Height), _tileColors[colorIndex]);
             }
         }
         var sourceRect = new Rectangle(_playerTiles.Height * (gameTime.TotalGameTime.Milliseconds / 250 %2) + (!_playerFacingLeft ? _playerTiles.Width / 2 : 0), 0, _playerTiles.Height, _playerTiles.Height);
@@ -42,26 +58,27 @@ internal class Dungeon : IEnumerable<Tile>
            sourceRect , Color.White);
     }
 
-    public void MovePlayer(int xMovement, int yMovement)
+    public Tile.TileType MovePlayer(Point direction)
     {
-        if (Tiles[PlayerPosition.X + xMovement, PlayerPosition.Y + yMovement].Type == Tile.TileType.Wall)
+        if (Tiles[PlayerPosition.X + direction.X, PlayerPosition.Y + direction.Y].Type == Tile.TileType.Wall)
         {
-            return;
+            return Tile.TileType.Empty;
         }
 
         PlayerPosition = new Point(
-            PlayerPosition.X + xMovement,
-            PlayerPosition.Y + yMovement
+            PlayerPosition.X + direction.X,
+            PlayerPosition.Y + direction.Y
         );
-        if (xMovement < 0)
+        if (direction.X < 0)
         {
             _playerFacingLeft = true;
         }
-        else if (xMovement > 0)
+        else if (direction.X > 0)
         {
             _playerFacingLeft = false;
         }
-
+        var tileType = Tiles[PlayerPosition.X, PlayerPosition.Y].Type;
         Tiles[PlayerPosition.X, PlayerPosition.Y].Type = Tile.TileType.Empty;
+        return tileType;
     }
 }
