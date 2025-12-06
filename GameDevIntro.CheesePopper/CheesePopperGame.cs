@@ -65,9 +65,11 @@ public class CheesePopperGame : Game
         //load music
         _backgroundMusic = Content.Load<Song>("Sounds/music");
 
-        NewGame();
+        //play music
         MediaPlayer.IsRepeating = true;
         MediaPlayer.Play(_backgroundMusic);
+
+        NewGame();
     }
 
     private void NewGame()

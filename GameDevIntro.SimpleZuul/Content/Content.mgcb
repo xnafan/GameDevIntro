@@ -13,12 +13,6 @@
 
 #---------------------------------- Content ---------------------------------#
 
-#begin C:/Users/kr/Desktop/Chest_opening.mp3
-/importer:Mp3Importer
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:C:/Users/kr/Desktop/Chest_opening.mp3;SoundEffects/Chest_opening.mp3
-
 #begin Fonts/DefaultFont.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
@@ -116,6 +110,12 @@
 /processor:SongProcessor
 /processorParam:Quality=Best
 /build:Music/Action 5.mp3;Music/Action_5.mp3
+
+#begin SoundEffects/Chest_opening.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:SoundEffects/Chest_opening.mp3
 
 #begin SoundEffects/Death_01.mp3
 /importer:Mp3Importer

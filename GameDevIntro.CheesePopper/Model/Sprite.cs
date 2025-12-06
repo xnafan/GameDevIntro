@@ -46,7 +46,6 @@ public class Sprite
         Direction = direction ?? Vector2.Zero; //if no direction was given, use no movement as default
         Texture = texture;
         Speed = speed;  
-        _quarterSize = new Vector2(Texture.Width, Texture.Height) / 2;
     }
 
     /// <summary>
@@ -74,6 +73,7 @@ public class Sprite
 
     public Rectangle GetBoundingRectangle()
     {
+        var _quarterSize = new Vector2(Texture.Width, Texture.Height) / 2;
         return new Rectangle(
             (int)(Position.X - _quarterSize.X),
             (int)(Position.Y - _quarterSize.Y),
