@@ -2,3 +2,4 @@ Change player icon to tombstone when player dies (RIP)
 Add hp bar above player character
 Add sand timer 
 dice indicator for rolls in combat instead of text
+Ensure all combat text is visible on different screen sizes (move inside visible area)

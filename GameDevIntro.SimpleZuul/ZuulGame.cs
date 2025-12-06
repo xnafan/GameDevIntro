@@ -116,23 +116,18 @@ public class ZuulGame : Game
         switch (CurrentState)
         {
             case GameState.TitleScreen:
-                if (_currentKeyboardState.GetPressedKeys().Length > 0)
-                {
-
-                    NewGame();
-                }
+                if (_currentKeyboardState.GetPressedKeys().Length > 0){NewGame();}
                 break;
             case GameState.Playing:
                 DecrementTime(gameTime);
                 MovePlayerBasedOnKeyboardState();
-                _floatingTexts.ForEach(ft => ft.Update(gameTime));
-                _floatingTexts.RemoveAll(ft => ft.IsExpired);
                 _bonusOMeter.Update(_score, gameTime);
-                Debug.WriteLine(_floatingTexts.Count);
                 break;
             case GameState.GameOver:
                 break;
         }
+        _floatingTexts.ForEach(ft => ft.Update(gameTime));
+        _floatingTexts.RemoveAll(ft => ft.IsExpired);
         _previousKeyboardState = _currentKeyboardState;
     }
 
@@ -175,9 +170,13 @@ public class ZuulGame : Game
 
             if (HandleTileInteraction(newPosition))
             {
-                _dungeon.Tiles[newPosition.X, newPosition.Y].Type = Tile.TileType.Empty;    
+                _dungeon.Tiles[newPosition.X, newPosition.Y].Type = Tile.TileType.Empty;
                 _dungeon.PlayerPosition = newPosition;
-            } 
+            }
+        }
+        if (_dungeon.ItemsLeft <= 0)
+        {
+            CurrentState = GameState.GameOver;
         }
     }
 
@@ -190,12 +189,12 @@ public class ZuulGame : Game
             case Tile.TileType.Empty:
                 return true;
             case Tile.TileType.Chest:
-            _dungeon.ItemsLeft--;
-            var secondsToAdd = 5;
-            _chestOpen.Play();
-            _score += secondsToAdd;
-            _floatingTexts.Add(new TextSprite($"+{secondsToAdd} sec", _defaultFont, new Vector2(_dungeon.PlayerPosition.X * _knightSpriteSheet.Height, _dungeon.PlayerPosition.Y * _knightSpriteSheet.Height) + _topLeftOfDungeon + Vector2.UnitY * -32, new Vector2(0, -1), Color.Gold));
-            return true;
+                _dungeon.ItemsLeft--;
+                var secondsToAdd = 5;
+                _chestOpen.Play();
+                _timeLeft += secondsToAdd;
+                _floatingTexts.Add(new TextSprite($"+{secondsToAdd} sec", _defaultFont, new Vector2(_dungeon.PlayerPosition.X * _knightSpriteSheet.Height, _dungeon.PlayerPosition.Y * _knightSpriteSheet.Height) + _topLeftOfDungeon + Vector2.UnitY * -32, new Vector2(0, -1), Color.Gold));
+                return true;
             case Tile.TileType.Wall:
                 return false;
             case Tile.TileType.Slime:
@@ -214,7 +213,7 @@ public class ZuulGame : Game
         var result = roll + _bonusOMeter.CurrentBonus;
         if (result > rollToBeat)
         {
-            _floatingTexts.Add(new TextSprite($"Victory! ({result} > 1)\n({roll}+{_bonusOMeter.CurrentBonus})", _defaultFont, new Vector2(_dungeon.PlayerPosition.X * _knightSpriteSheet.Height, _dungeon.PlayerPosition.Y * _knightSpriteSheet.Height) + _topLeftOfDungeon + Vector2.UnitY * -32, new Vector2(0, -1), Color.LightGreen, 0.1f, 1500));
+            _floatingTexts.Add(new TextSprite($"Victory! ({result} > {rollToBeat})\n({roll}+{_bonusOMeter.CurrentBonus})", _defaultFont, new Vector2(_dungeon.PlayerPosition.X * _knightSpriteSheet.Height, _dungeon.PlayerPosition.Y * _knightSpriteSheet.Height) + _topLeftOfDungeon + Vector2.UnitY * -32, new Vector2(0, -1), Color.LightGreen, 0.1f, 1500));
             _score += 15;
             _dungeon.ItemsLeft--;
             PlayRandomSwordSound();
@@ -225,7 +224,7 @@ public class ZuulGame : Game
             var damageTaken = Random.Shared.Next(6) + 1 + enemyDamageBonus;
 
             _deathSounds[Random.Shared.Next(_deathSounds.Count)].Play();
-            _floatingTexts.Add(new TextSprite($"Defeat! ({result} < {rollToBeat})", _defaultFont, new Vector2(_dungeon.PlayerPosition.X * _knightSpriteSheet.Height, _dungeon.PlayerPosition.Y * _knightSpriteSheet.Height) + _topLeftOfDungeon + Vector2.UnitY * -32, new Vector2(0, -1), Color.IndianRed, 0.1f, 1500));
+            _floatingTexts.Add(new TextSprite($"Defeat! ({result} =< {rollToBeat})", _defaultFont, new Vector2(_dungeon.PlayerPosition.X * _knightSpriteSheet.Height, _dungeon.PlayerPosition.Y * _knightSpriteSheet.Height) + _topLeftOfDungeon + Vector2.UnitY * -32, new Vector2(0, -1), Color.IndianRed, 0.1f, 1500));
             _hpLeft -= damageTaken;
         }
         if (_hpLeft <= 0)
@@ -287,7 +286,7 @@ public class ZuulGame : Game
 
                 if (_bonusOMeter.CurrentBonus > -1)
                 {
-                Vector2 destination = new Vector2(_topLeftOfDungeon.X + _tileSpriteSheet.Height * (_dungeon.PlayerPosition.X+1), _topLeftOfDungeon.Y + _tileSpriteSheet.Height * (_dungeon.PlayerPosition.Y+1)) - Vector2.One*4;
+                    Vector2 destination = new Vector2(_topLeftOfDungeon.X + _tileSpriteSheet.Height * (_dungeon.PlayerPosition.X + 1), _topLeftOfDungeon.Y + _tileSpriteSheet.Height * (_dungeon.PlayerPosition.Y + 1)) - Vector2.One * 4;
 
 
                     for (int x = -1; x <= 1; x++)
@@ -300,7 +299,7 @@ public class ZuulGame : Game
                         }
 
                     }
-                    _spriteBatch.DrawString(_smallFont, "+" + _bonusOMeter.CurrentBonus, destination,Color.White);
+                    _spriteBatch.DrawString(_smallFont, "+" + _bonusOMeter.CurrentBonus, destination, Color.White);
 
                 }
                 WriteItemsLeft();
