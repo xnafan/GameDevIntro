@@ -75,6 +75,18 @@
 /processorParam:TextureFormat=Color
 /build:Graphics/TitleScreen.png
 
+#begin Graphics/Victory.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Graphics/Victory.png
+
 #begin Graphics/Zuul_Logo_Small.png
 /importer:TextureImporter
 /processor:TextureProcessor

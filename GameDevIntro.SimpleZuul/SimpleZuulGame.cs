@@ -9,14 +9,15 @@ using Microsoft.Xna.Framework.Media;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 namespace GameDevIntro.SimpleZuul;
 public class SimpleZuulGame : Game
 {
     #region Variables
-    public enum GameState { TitleScreen, Playing, GameOver }
+    public enum GameState { TitleScreen, Playing, GameLost, GameWon }
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
-    private Texture2D _titleScreenTexture, _tileSpriteSheet, _knightSpriteSheet, _logoSmall, _difficultyLegend;
+    private Texture2D _titleScreenTexture, _tileSpriteSheet, _knightSpriteSheet, _logoSmall, _difficultyLegend, _whiteTexture, _victoryTexture;
     private KeyboardState _currentKeyboardState, _previousKeyboardState;
     private Dungeon _dungeon;
     private readonly int _dungeonWidth = 27, _dungeonHeight = 17;
@@ -25,6 +26,7 @@ public class SimpleZuulGame : Game
     private SoundEffect _chestOpen, _swordSound, _deathSound;
     private List<TextSprite> _floatingTexts = new();
     private Player _player = new();
+    private int _numberOfRedScreens;
 
     public GameState CurrentState { get; set; }
     #endregion
@@ -50,6 +52,7 @@ public class SimpleZuulGame : Game
         _knightSpriteSheet = Content.Load<Texture2D>("Graphics/knight_spritesheet");
         _logoSmall = Content.Load<Texture2D>("Graphics/Zuul_logo_small");
         _difficultyLegend = Content.Load<Texture2D>("Graphics/difficulty_192px");
+        _victoryTexture = Content.Load<Texture2D>("Graphics/Victory");
 
         _defaultFont = Content.Load<SpriteFont>("Fonts/DefaultFont");
 
@@ -58,6 +61,9 @@ public class SimpleZuulGame : Game
         _swordSound = Content.Load<SoundEffect>($"SoundEffects/sword_01");
         _deathSound = Content.Load<SoundEffect>($"SoundEffects/death_01");
         _chestOpen = Content.Load<SoundEffect>("SoundEffects/chest_opening");
+
+        _whiteTexture = new Texture2D(GraphicsDevice, 1, 1);
+        _whiteTexture.SetData(new[] { Color.White });
 
         MediaPlayer.IsRepeating = true;
         PlayMusic();
@@ -72,7 +78,7 @@ public class SimpleZuulGame : Game
         _currentKeyboardState = Keyboard.GetState();
 
         if (_currentKeyboardState.IsKeyDown(Keys.Escape)) { Exit(); }
-        if (_currentKeyboardState.IsKeyDown(Keys.F5) && _previousKeyboardState.IsKeyUp(Keys.F5)) { NewGame(); }
+        if (KeyWasPressed(Keys.F5) || KeyWasPressed(Keys.Enter)) { NewGame(); }
         if (_currentKeyboardState.IsKeyDown(Keys.F11) && !_previousKeyboardState.IsKeyDown(Keys.F11))
         {
             _graphics.IsFullScreen = !_graphics.IsFullScreen;
@@ -88,8 +94,6 @@ public class SimpleZuulGame : Game
             case GameState.Playing:
                 MovePlayerBasedOnKeyboardState();
                 break;
-            case GameState.GameOver:
-                break;
         }
 
         UpdateFloatingTexts(gameTime);
@@ -98,7 +102,7 @@ public class SimpleZuulGame : Game
 
     private void UpdateFloatingTexts(GameTime gameTime)
     {
-         
+
         _floatingTexts.ForEach(ft => ft.Update(gameTime));
         _floatingTexts.RemoveAll(ft => ft.IsExpired);
     }
@@ -109,11 +113,11 @@ public class SimpleZuulGame : Game
         Tile.TileType tileType = Tile.TileType.Empty;
         Point direction = Point.Zero;
 
-        if (KeyWasPressed(Keys.Up) || KeyWasPressed(Keys.W)){direction = new Point(0, -1);}
-        else if (KeyWasPressed(Keys.Down) || KeyWasPressed(Keys.S)){direction = new Point(0, 1);}
-        else if (KeyWasPressed(Keys.Left) || KeyWasPressed(Keys.A)){direction = new Point(-1, 0);}
-        else if (KeyWasPressed(Keys.Right) || KeyWasPressed(Keys.D)){direction = new Point(1, 0);}
-
+        if (KeyWasPressed(Keys.Up) || KeyWasPressed(Keys.W)) { direction = new Point(0, -1); }
+        else if (KeyWasPressed(Keys.Down) || KeyWasPressed(Keys.S)) { direction = new Point(0, 1); }
+        else if (KeyWasPressed(Keys.Left) || KeyWasPressed(Keys.A)) { direction = new Point(-1, 0); }
+        else if (KeyWasPressed(Keys.Right) || KeyWasPressed(Keys.D)) { direction = new Point(1, 0); }
+        if(KeyWasPressed(Keys.Space)){ CurrentState = GameState.GameWon; }
         if (direction != Point.Zero)
         {
             var newPosition = oldPosition + direction;
@@ -124,10 +128,10 @@ public class SimpleZuulGame : Game
                 _dungeon.Tiles[newPosition.X, newPosition.Y].Type = Tile.TileType.Empty;
                 _dungeon.Player.Position = newPosition;
             }
-        }
-        if (_dungeon.ItemsLeft <= 0)
-        {
-            CurrentState = GameState.GameOver;
+            if (_dungeon.ItemsLeft <= 0)
+            {
+                CurrentState = GameState.GameWon;
+            }
         }
     }
 
@@ -143,9 +147,24 @@ public class SimpleZuulGame : Game
                 return true;
             case Tile.TileType.Chest:
                 _dungeon.ItemsLeft--;
-                var secondsToAdd = 5;
+                var hpToAdd = Random.Shared.Next(6) + 1;
                 _chestOpen.Play();
-                _floatingTexts.Add(new TextSprite($"+{secondsToAdd} sec", _defaultFont, new Vector2(_dungeon.Player.Position.X * _knightSpriteSheet.Height, _dungeon.Player.Position.Y * _knightSpriteSheet.Height) + Vector2.UnitY * -32, new Vector2(0, -1), Color.Gold));
+
+                var chestContentRoll = Random.Shared.Next(6) + 1;
+                if (_player.AttackRollBonus >= 2)
+                {
+                    chestContentRoll = 1;   //ensure no more strength bonuses
+                }
+                if (chestContentRoll < 5)
+                {
+
+                    _floatingTexts.Add(new TextSprite($"Health potion! +{hpToAdd} hp", _defaultFont, new Vector2(_dungeon.Player.Position.X * _knightSpriteSheet.Height, _dungeon.Player.Position.Y * _knightSpriteSheet.Height) + Vector2.UnitY * -32, new Vector2(0, -1), Color.LightGreen, 0.1f, 2000));
+                }
+                else
+                {
+                    _player.AttackRollBonus++;
+                    _floatingTexts.Add(new TextSprite($"Strength bonus! +1 to attack rolls", _defaultFont, new Vector2(_dungeon.Player.Position.X * _knightSpriteSheet.Height, _dungeon.Player.Position.Y * _knightSpriteSheet.Height) + Vector2.UnitY * -32, new Vector2(0, -1), Color.Gold, 0.1f, 2000));
+                }
                 return true;
             case Tile.TileType.Wall:
                 return false;
@@ -162,13 +181,18 @@ public class SimpleZuulGame : Game
     private bool HandleCombat(int rollToBeat, int pointsForVictory, int enemyDamageBonus = 0)
     {
         var roll = Random.Shared.Next(6) + 1;
-        var result = roll;
+        var result = roll + _player.AttackRollBonus;
+        var resultText = $"{roll}";
+        if (_player.AttackRollBonus > 0)
+        {
+            resultText += $" + {_player.AttackRollBonus}";
+        }
         if (result > rollToBeat)
         {
-            _floatingTexts.Add(new TextSprite($"Victory! ({result} > {rollToBeat})\n({roll}", _defaultFont, new Vector2(_dungeon.Player.Position.X * _knightSpriteSheet.Height, _dungeon.Player.Position.Y * _knightSpriteSheet.Height) + Vector2.UnitY * -32, new Vector2(0, -1), Color.LightGreen, 0.1f, 1500));
+            _floatingTexts.Add(new TextSprite($"{resultText} > {rollToBeat} = Victory! ", _defaultFont, new Vector2(_dungeon.Player.Position.X * _knightSpriteSheet.Height, _dungeon.Player.Position.Y * _knightSpriteSheet.Height) + Vector2.UnitY * -32, new Vector2(0, -1), Color.LightGreen, 0.1f, 1500));
             _dungeon.ItemsLeft--;
             PlayRandomSwordSound();
-            _player.Score+= pointsForVictory;
+            _player.Score += pointsForVictory;
             return true;
         }
         else
@@ -179,12 +203,13 @@ public class SimpleZuulGame : Game
             damageTaken = Math.Max(damageTaken, 1);
 
             _deathSound.Play();
-            _floatingTexts.Add(new TextSprite($"Defeat! ({result} <= {rollToBeat})", _defaultFont, new Vector2(_dungeon.Player.Position.X * _knightSpriteSheet.Height, _dungeon.Player.Position.Y * _knightSpriteSheet.Height) + Vector2.UnitY * -32, new Vector2(0, -1), Color.IndianRed, 0.1f, 1500));
+            _floatingTexts.Add(new TextSprite($"{result} <= {rollToBeat} = Defeat!", _defaultFont, new Vector2(_dungeon.Player.Position.X * _knightSpriteSheet.Height, _dungeon.Player.Position.Y * _knightSpriteSheet.Height) + Vector2.UnitY * -32, new Vector2(0, -1), Color.IndianRed, 0.1f, 1500));
             _player.HitPoints -= damageTaken;
+            _numberOfRedScreens = 3;
         }
         if (_player.HitPoints <= 0)
         {
-            CurrentState = GameState.GameOver;
+            CurrentState = GameState.GameLost;
             _dungeon.Tiles[_dungeon.Player.Position.X, _dungeon.Player.Position.Y].Type = Tile.TileType.Tombstone;
 
         }
@@ -230,26 +255,44 @@ public class SimpleZuulGame : Game
                 _spriteBatch.DrawString(_defaultFont, "WASD/Arrow keys - Move | F5 - New Game | F11 - Toggle Fullscreen | Esc - Quit", new Vector2(20, _graphics.PreferredBackBufferHeight - 40), Color.White);
                 break;
             case GameState.Playing:
-            case GameState.GameOver:
+            case GameState.GameLost:
+            case GameState.GameWon:
                 _dungeon.Draw(_spriteBatch, gameTime, Vector2.Zero);
-                DrawMiniLogo(gameTime);
                 _floatingTexts.ForEach(ft => ft.Draw(_spriteBatch, gameTime));
                 DrawDifficultyLegend();
-                WriteItemsLeft();
+                WriteScoreAndHP();
+                DrawMiniLogo(gameTime);
                 break;
         }
-
-
+        if (_numberOfRedScreens > 0)
+        {
+            _spriteBatch.Draw(_whiteTexture, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight), Color.Red * 0.2f * _numberOfRedScreens);
+            _numberOfRedScreens = 0;
+        }
+        if (CurrentState == GameState.GameWon){DrawWonMessage(gameTime);}
         _spriteBatch.End();
+    }
+
+    private void DrawWonMessage(GameTime gameTime)
+    {
+        //draw victory texture centered,  scaled to 50%    
+        var scale = 0.5f;
+        var destinationRectangle = new Rectangle(
+            (_graphics.PreferredBackBufferWidth - (int)(_victoryTexture.Width * scale)) / 2,
+            (_graphics.PreferredBackBufferHeight - (int)(_victoryTexture.Height * scale)) / 2 + (int)(Math.Sin(gameTime.TotalGameTime.TotalMilliseconds / 350) * 10),
+            (int)(_victoryTexture.Width * scale),
+            (int)(_victoryTexture.Height * scale)
+        );
+        _spriteBatch.Draw(_victoryTexture, destinationRectangle, Color.White);
     }
 
     private void DrawDifficultyLegend()
     {
-        
-        _spriteBatch.Draw(_difficultyLegend, new Vector2(_graphics.PreferredBackBufferWidth-_difficultyLegend.Width +10 , 250), Color.White);
+
+        _spriteBatch.Draw(_difficultyLegend, new Vector2(_graphics.PreferredBackBufferWidth - _difficultyLegend.Width + 10, 250), Color.White);
     }
 
-    private void WriteItemsLeft()
+    private void WriteScoreAndHP()
     {
         // draw the score below the bonus o meter
         var itemsLeftText = $"{_player.Score} points | {_player.HitPoints} hp left";
@@ -262,7 +305,7 @@ public class SimpleZuulGame : Game
     {
         //calculate a destination rectangle for the logo with a scaling factor of 0.5
 
-        int xOffsetForDungeonWidth = _dungeonWidth * _tileSpriteSheet.Height -7 ;
+        int xOffsetForDungeonWidth = _dungeonWidth * _tileSpriteSheet.Height - 7;
         var logoScale = 0.4f;
         var destinationRectangle = new Rectangle(
             xOffsetForDungeonWidth,
