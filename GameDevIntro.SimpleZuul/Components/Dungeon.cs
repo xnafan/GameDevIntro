@@ -9,7 +9,6 @@ namespace GameDevIntro.SimpleZuul.Components;
 internal class Dungeon : IEnumerable<Tile>
 {
     #region Properties
-    private static Color[] _tileColors;
     private Texture2D _wallTiles, _playerTiles;
     public Tile[,] Tiles { get; set; }
     public Point PlayerPosition { get; set; }
@@ -25,20 +24,6 @@ internal class Dungeon : IEnumerable<Tile>
         Tiles = new Tile[width, height];
         _wallTiles = wallTiles;
         _playerTiles = playerTiles;
-        GenerateTileColors();
-    }
-
-    private void GenerateTileColors()
-    {
-        //generate colors from white to black
-        int numShades = 4;
-        _tileColors = new Color[numShades+1];
-        for (int i = 0; i < numShades; i++)
-        {
-            int shade = 255 - i * (255/numShades);
-            _tileColors[i] = new Color(shade, shade, shade);
-        }
-        _tileColors[numShades] = Color.Black;
     }
 
     public IEnumerator<Tile> GetEnumerator() => new TileDoubleArrayIterator(Tiles);
@@ -50,8 +35,7 @@ internal class Dungeon : IEnumerable<Tile>
         {
             for (int y = 0; y < Height; y++)
             {
-                var colorIndex = Math.Clamp((int)(Vector2.Distance(new Vector2(PlayerPosition.X, PlayerPosition.Y), new Vector2(x, y)) / 2), 0, _tileColors.Length - 1);
-                Tiles[x, y].Draw(spriteBatch, gameTime,topLeft + new Vector2(x * _wallTiles.Height, y * _wallTiles.Height), _tileColors[colorIndex]);
+                Tiles[x, y].Draw(spriteBatch, gameTime,topLeft + new Vector2(x * _wallTiles.Height, y * _wallTiles.Height), Color.White);
             }
         }
         var sourceRect = new Rectangle(_playerTiles.Height * (gameTime.TotalGameTime.Milliseconds / 250 %2) + (!_playerFacingLeft ? _playerTiles.Width / 2 : 0), 0, _playerTiles.Height, _playerTiles.Height);

@@ -27,18 +27,6 @@
 /processorParam:TextureFormat=Compressed
 /build:Fonts/SmallFont.spritefont
 
-#begin Graphics/BonusOMeter.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Graphics/BonusOMeter.png
-
 #begin Graphics/Knight_spritesheet.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -75,18 +63,6 @@
 /processorParam:TextureFormat=Color
 /build:Graphics/TitleScreen.png
 
-#begin Graphics/wall_tiles.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Graphics/wall_tiles.png
-
 #begin Graphics/Zuul_Logo_Small.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -99,17 +75,11 @@
 /processorParam:TextureFormat=Color
 /build:Graphics/Zuul_Logo_Small.png
 
-#begin Music/Action 3.mp3
+#begin Music/Action_3.mp3
 /importer:Mp3Importer
 /processor:SongProcessor
 /processorParam:Quality=Best
-/build:Music/Action 3.mp3;Music/Action_3.mp3
-
-#begin Music/Action 5.mp3
-/importer:Mp3Importer
-/processor:SongProcessor
-/processorParam:Quality=Best
-/build:Music/Action 5.mp3;Music/Action_5.mp3
+/build:Music/Action_3.mp3;Music/Action_3.mp3
 
 #begin SoundEffects/Chest_opening.mp3
 /importer:Mp3Importer
@@ -123,39 +93,9 @@
 /processorParam:Quality=Best
 /build:SoundEffects/Death_01.mp3
 
-#begin SoundEffects/Death_02.mp3
-/importer:Mp3Importer
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:SoundEffects/Death_02.mp3
-
 #begin SoundEffects/Sword_01.mp3
 /importer:Mp3Importer
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:SoundEffects/Sword_01.mp3
-
-#begin SoundEffects/Sword_02.mp3
-/importer:Mp3Importer
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:SoundEffects/Sword_02.mp3
-
-#begin SoundEffects/Sword_03.mp3
-/importer:Mp3Importer
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:SoundEffects/Sword_03.mp3
-
-#begin SoundEffects/Sword_04.mp3
-/importer:Mp3Importer
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:SoundEffects/Sword_04.mp3
-
-#begin SoundEffects/Sword_05.mp3
-/importer:Mp3Importer
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:SoundEffects/Sword_05.mp3
 

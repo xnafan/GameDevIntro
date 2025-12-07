@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameDevIntro.CheesePopper",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameDevIntro.SimpleZuul", "GameDevIntro.SimpleZuul\GameDevIntro.SimpleZuul.csproj", "{6C0C3AF7-5522-4556-941E-414FA94C137B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameDevIntro.FullZuul", "GameDevIntro.FullZuul\GameDevIntro.FullZuul.csproj", "{195E1F7A-B64B-39BD-E0D3-1C52B9E58004}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{6C0C3AF7-5522-4556-941E-414FA94C137B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6C0C3AF7-5522-4556-941E-414FA94C137B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6C0C3AF7-5522-4556-941E-414FA94C137B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{195E1F7A-B64B-39BD-E0D3-1C52B9E58004}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{195E1F7A-B64B-39BD-E0D3-1C52B9E58004}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{195E1F7A-B64B-39BD-E0D3-1C52B9E58004}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{195E1F7A-B64B-39BD-E0D3-1C52B9E58004}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
