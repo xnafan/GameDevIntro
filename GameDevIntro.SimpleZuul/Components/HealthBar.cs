@@ -7,7 +7,6 @@ namespace GameDevIntro.SimpleZuul.Components;
 internal class HealthBar
 {
     private static Texture2D _whiteTexture;
-
     public  SpriteBatch SpriteBatch { get; set; }
 
     private static Color[] _colors = [Color.Red, Color.Red, Color.Orange, Color.Orange, Color.Yellow, Color.Yellow, Color.Yellow, Color.Green, Color.Green, Color.Green];
@@ -21,7 +20,7 @@ internal class HealthBar
         }
 
         // Draw border
-        spriteBatch.Draw(_whiteTexture, new Rectangle((int)(topCenter.X - width / 2 - borderThickness), (int)(topCenter.Y - borderThickness), width + borderThickness * 2, height + borderThickness * 2), Color.Silver);
+        spriteBatch.Draw(_whiteTexture, new Rectangle((int)(topCenter.X - width / 2 - borderThickness), (int)(topCenter.Y - borderThickness), width + borderThickness * 2, height + borderThickness * 2), Color.Gray);
         
         // Draw health bar
         spriteBatch.Draw(_whiteTexture, new Rectangle((int)(topCenter.X - width / 2), (int)(topCenter.Y), width, height), Color.Black);

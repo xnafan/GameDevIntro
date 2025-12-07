@@ -11,7 +11,7 @@ internal class Dungeon : IEnumerable<Tile>
     #region Properties
     private Texture2D _wallTiles, _playerTiles;
     public Tile[,] Tiles { get; set; }
-    public Player Player{ get; set; }
+    public Player Player { get; set; }
     private bool _playerFacingLeft = true;
 
     public int Width { get => Tiles.GetLength(0); }
@@ -36,16 +36,16 @@ internal class Dungeon : IEnumerable<Tile>
         {
             for (int y = 0; y < Height; y++)
             {
-                Tiles[x, y].Draw(spriteBatch, gameTime,topLeft + new Vector2(x * _wallTiles.Height, y * _wallTiles.Height), Color.White);
+                Tiles[x, y].Draw(spriteBatch, gameTime, topLeft + new Vector2(x * _wallTiles.Height, y * _wallTiles.Height), Color.White);
             }
         }
-        if(Player.HitPoints > 0)
+        if (Player.HitPoints > 0)
         {
 
-        var sourceRect = new Rectangle(_playerTiles.Height * (gameTime.TotalGameTime.Milliseconds / 250 %2) + (!_playerFacingLeft ? _playerTiles.Width / 2 : 0), 0, _playerTiles.Height, _playerTiles.Height);
+            var sourceRect = new Rectangle(_playerTiles.Height * (gameTime.TotalGameTime.Milliseconds / 250 % 2) + (!_playerFacingLeft ? _playerTiles.Width / 2 : 0), 0, _playerTiles.Height, _playerTiles.Height);
 
-        spriteBatch.Draw(_playerTiles, new Rectangle((int)(topLeft.X + Player.Position.X * _wallTiles.Height), (int)(topLeft.Y + Player.Position.Y * _wallTiles.Height), _playerTiles.Height, _playerTiles.Height),
-           sourceRect , Color.White);
+            spriteBatch.Draw(_playerTiles, new Rectangle((int)(topLeft.X + Player.Position.X * _wallTiles.Height), (int)(topLeft.Y + Player.Position.Y * _wallTiles.Height), _playerTiles.Height, _playerTiles.Height),
+               sourceRect, Color.White);
 
             HealthBar.Draw(spriteBatch, new Vector2(topLeft.X + Player.Position.X * _wallTiles.Height + _playerTiles.Height / 2, topLeft.Y + Player.Position.Y * _wallTiles.Height - 10),
                 (float)Player.HitPoints / Player.MAX_HITPOINTS);
