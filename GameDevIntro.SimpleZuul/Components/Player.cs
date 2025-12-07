@@ -13,6 +13,7 @@ internal class Player
     {
         Score = 0;
         HitPoints = MAX_HITPOINTS;
+        AttackRollBonus = 0;
     }
 
     public void Heal(int amount)

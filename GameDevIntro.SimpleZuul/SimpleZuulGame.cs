@@ -21,7 +21,7 @@ public class SimpleZuulGame : Game
     private KeyboardState _currentKeyboardState, _previousKeyboardState;
     private Dungeon _dungeon;
     private readonly int _dungeonWidth = 27, _dungeonHeight = 17;
-    private SpriteFont _defaultFont;
+    private SpriteFont _defaultFont, _smallFont;
     private Song _backgroundMusic1;
     private SoundEffect _chestOpen, _swordSound, _deathSound;
     private List<TextSprite> _floatingTexts = new();
@@ -55,6 +55,7 @@ public class SimpleZuulGame : Game
         _victoryTexture = Content.Load<Texture2D>("Graphics/Victory");
 
         _defaultFont = Content.Load<SpriteFont>("Fonts/DefaultFont");
+        _smallFont = Content.Load<SpriteFont>("Fonts/SmallFont");
 
         _backgroundMusic1 = Content.Load<Song>("Music/Action_3");
 
@@ -78,7 +79,7 @@ public class SimpleZuulGame : Game
         _currentKeyboardState = Keyboard.GetState();
 
         if (_currentKeyboardState.IsKeyDown(Keys.Escape)) { Exit(); }
-        if (KeyWasPressed(Keys.F5) || KeyWasPressed(Keys.Enter)) { NewGame(); }
+        if (KeyWasPressed(Keys.Enter)) { NewGame(); }
         if (_currentKeyboardState.IsKeyDown(Keys.F11) && !_previousKeyboardState.IsKeyDown(Keys.F11))
         {
             _graphics.IsFullScreen = !_graphics.IsFullScreen;
@@ -117,7 +118,10 @@ public class SimpleZuulGame : Game
         else if (KeyWasPressed(Keys.Down) || KeyWasPressed(Keys.S)) { direction = new Point(0, 1); }
         else if (KeyWasPressed(Keys.Left) || KeyWasPressed(Keys.A)) { direction = new Point(-1, 0); }
         else if (KeyWasPressed(Keys.Right) || KeyWasPressed(Keys.D)) { direction = new Point(1, 0); }
-        if(KeyWasPressed(Keys.Space)){ CurrentState = GameState.GameWon; }
+        if(KeyWasPressed(Keys.Space)){ 
+            CurrentState = GameState.GameWon; 
+//            _player.AttackRollBonus++;
+            }
         if (direction != Point.Zero)
         {
             var newPosition = oldPosition + direction;
@@ -228,7 +232,7 @@ public class SimpleZuulGame : Game
 
     private void NewGame()
     {
-        _dungeon = DungeonGenerator.GenerateDungeon(_dungeonWidth, _dungeonHeight, _player, _tileSpriteSheet, _knightSpriteSheet);
+        _dungeon = DungeonGenerator.GenerateDungeon(_dungeonWidth, _dungeonHeight, _player, _tileSpriteSheet, _knightSpriteSheet, _smallFont);
         PlayMusic();
         _player.Reset();
         CurrentState = GameState.Playing;
@@ -252,12 +256,12 @@ public class SimpleZuulGame : Game
         {
             case GameState.TitleScreen:
                 DrawTitleScreen();
-                _spriteBatch.DrawString(_defaultFont, "WASD/Arrow keys - Move | F5 - New Game | F11 - Toggle Fullscreen | Esc - Quit", new Vector2(20, _graphics.PreferredBackBufferHeight - 40), Color.White);
+                _spriteBatch.DrawString(_defaultFont, "WASD/Arrow keys - Move | ENTER - New Game | F11 - Toggle Fullscreen | Esc - Quit", new Vector2(20, _graphics.PreferredBackBufferHeight - 40), Color.White);
                 break;
             case GameState.Playing:
             case GameState.GameLost:
             case GameState.GameWon:
-                _dungeon.Draw(_spriteBatch, gameTime, Vector2.Zero);
+                _dungeon.Draw(_spriteBatch, gameTime);
                 _floatingTexts.ForEach(ft => ft.Draw(_spriteBatch, gameTime));
                 DrawDifficultyLegend();
                 WriteScoreAndHP();
@@ -270,6 +274,17 @@ public class SimpleZuulGame : Game
             _numberOfRedScreens = 0;
         }
         if (CurrentState == GameState.GameWon){DrawWonMessage(gameTime);}
+        else if (CurrentState == GameState.GameLost) {
+            //write "ENTER TO RESTART" centered on the screen
+            var lostText = "YOU HAVE PERISHED! PRESS ENTER TO RESTART";
+            var textSize = _defaultFont.MeasureString(lostText);
+            var yOffset = (int)(Math.Sin(gameTime.TotalGameTime.TotalMilliseconds / 500) * 5);
+            //draw shadow   
+            _spriteBatch.DrawString(_defaultFont, lostText, new Vector2((_graphics.PreferredBackBufferWidth - textSize.X) / 2 + 2, (_graphics.PreferredBackBufferHeight - textSize.Y) / 2 + 2 + yOffset), Color.Black);
+            _spriteBatch.DrawString(_defaultFont, lostText, new Vector2((_graphics.PreferredBackBufferWidth - textSize.X) / 2, (_graphics.PreferredBackBufferHeight - textSize.Y) / 2 + yOffset) , Color.White);
+
+
+        }
         _spriteBatch.End();
     }
 

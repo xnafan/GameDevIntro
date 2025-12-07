@@ -4,10 +4,17 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace GameDevIntro.SimpleZuul.Tools;
 internal static class DungeonGenerator
 {
+    private const int NUMBER_OF_DRAGONS = 3;
+    private const int NUMBER_OF_SKELETONS = 10;
+    private const int NUMBER_OF_BLOBS = 20;
+    private const int NUMBER_OF_CHESTS = 6;
+
+
     private static readonly Point[] Directions = new[]
     {
         new Point(-2, 0),  // Left
@@ -25,9 +32,10 @@ internal static class DungeonGenerator
         new Point(0, 1)    // Down
     };
 
-    public static Dungeon GenerateDungeon(int width, int height, Player player, Texture2D spriteSheet, Texture2D playerSpriteSheet)
+    public static Dungeon GenerateDungeon(int width, int height, Player player, Texture2D spriteSheet, Texture2D playerSpriteSheet, SpriteFont attackBonusFont
+        )
     {
-        var dungeon = new Dungeon(width, height, player, spriteSheet, playerSpriteSheet);
+        var dungeon = new Dungeon(width, height, player, spriteSheet, playerSpriteSheet, attackBonusFont);
 
         // Initialize all tiles as walls
         for (int x = 0; x < dungeon.Width; x++)
@@ -216,46 +224,60 @@ internal static class DungeonGenerator
 
     private static void AddContent(Dungeon dungeon)
     {
-        //TODO: More sophisticated content placement
-        // chests at the end of corridors
+        var random = new Random();
+        
+        // Get all empty tiles that are not too close to player position
+        var availablePositions = new List<Point>();
+        
         for (int x = 0; x < dungeon.Width; x++)
         {
             for (int y = 0; y < dungeon.Height; y++)
             {
-                var deltaX = Math.Abs( x - dungeon.Player.Position.X);
-                var deltaY = Math.Abs( y - dungeon.Player.Position.Y);
-                if (deltaX < 2 || deltaY < 2)
+                var deltaX = Math.Abs(x - dungeon.Player.Position.X);
+                var deltaY = Math.Abs(y - dungeon.Player.Position.Y);
+                
+                if ((deltaX >= 2 && deltaY >= 2) && dungeon.Tiles[x, y].Type == Tile.TileType.Empty)
                 {
-                    continue; // Skip player position
-                }
-
-                if (dungeon.Tiles[x, y].Type == Tile.TileType.Empty)
-                {
-                    // Simple random chance to add a monster
-                    var rand = new Random();
-                    int roll = rand.Next(100);
-                    if (roll < 2) // 2% chance for Dragon
-                    {
-                        dungeon.Tiles[x, y].Type = Tile.TileType.Dragon;
-                        dungeon.ItemsLeft++;
-                    }
-                    else if (roll < 8) // 6% chance for Skeleton
-                    {
-                        dungeon.Tiles[x, y].Type = Tile.TileType.Skeleton;
-                        dungeon.ItemsLeft++;
-                    }
-                    else if (roll < 20) // 12% chance for Slime
-                    {
-                        dungeon.Tiles[x, y].Type = Tile.TileType.Slime;
-                        dungeon.ItemsLeft++;
-                    }
-                    else if (roll < 25) // 5% chance for Chest
-                    {
-                        dungeon.Tiles[x, y].Type = Tile.TileType.Chest;
-                        dungeon.ItemsLeft++;
-                    }
+                    availablePositions.Add(new Point(x, y));
                 }
             }
+        }
+        
+        // Shuffle available positions for random placement
+        ShuffleList(availablePositions, random);
+        
+        int positionIndex = 0;
+        
+        // Place Dragons
+        for (int i = 0; i < NUMBER_OF_DRAGONS && positionIndex < availablePositions.Count; i++)
+        {
+            var pos = availablePositions[positionIndex++];
+            dungeon.Tiles[pos.X, pos.Y].Type = Tile.TileType.Dragon;
+            dungeon.ItemsLeft++;
+        }
+        
+        // Place Skeletons
+        for (int i = 0; i < NUMBER_OF_SKELETONS && positionIndex < availablePositions.Count; i++)
+        {
+            var pos = availablePositions[positionIndex++];
+            dungeon.Tiles[pos.X, pos.Y].Type = Tile.TileType.Skeleton;
+            dungeon.ItemsLeft++;
+        }
+        
+        // Place Slimes (Blobs)
+        for (int i = 0; i < NUMBER_OF_BLOBS && positionIndex < availablePositions.Count; i++)
+        {
+            var pos = availablePositions[positionIndex++];
+            dungeon.Tiles[pos.X, pos.Y].Type = Tile.TileType.Slime;
+            dungeon.ItemsLeft++;
+        }
+        
+        // Place Chests
+        for (int i = 0; i < NUMBER_OF_CHESTS && positionIndex < availablePositions.Count; i++)
+        {
+            var pos = availablePositions[positionIndex++];
+            dungeon.Tiles[pos.X, pos.Y].Type = Tile.TileType.Chest;
+            dungeon.ItemsLeft++;
         }
     }
 
