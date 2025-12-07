@@ -46,6 +46,9 @@ internal class Dungeon : IEnumerable<Tile>
 
         spriteBatch.Draw(_playerTiles, new Rectangle((int)(topLeft.X + Player.Position.X * _wallTiles.Height), (int)(topLeft.Y + Player.Position.Y * _wallTiles.Height), _playerTiles.Height, _playerTiles.Height),
            sourceRect , Color.White);
+
+            HealthBar.Draw(spriteBatch, new Vector2(topLeft.X + Player.Position.X * _wallTiles.Height + _playerTiles.Height / 2, topLeft.Y + Player.Position.Y * _wallTiles.Height - 10),
+                (float)Player.HitPoints / Player.MAX_HITPOINTS);
         }
     }
 
