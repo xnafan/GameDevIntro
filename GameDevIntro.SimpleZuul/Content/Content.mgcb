@@ -27,6 +27,18 @@
 /processorParam:TextureFormat=Compressed
 /build:Fonts/SmallFont.spritefont
 
+#begin Graphics/difficulty_192px.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Graphics/difficulty_192px.png
+
 #begin Graphics/Knight_spritesheet.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -79,7 +91,7 @@
 /importer:Mp3Importer
 /processor:SongProcessor
 /processorParam:Quality=Best
-/build:Music/Action_3.mp3;Music/Action_3.mp3
+/build:Music/Action_3.mp3
 
 #begin SoundEffects/Chest_opening.mp3
 /importer:Mp3Importer

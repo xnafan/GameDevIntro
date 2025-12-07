@@ -10,27 +10,27 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 namespace GameDevIntro.SimpleZuul;
-public class ZuulGame : Game
+public class SimpleZuulGame : Game
 {
     #region Variables
     public enum GameState { TitleScreen, Playing, GameOver }
-    private int _hpLeft = 25;
-    const int MAX_HP = 25;
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
-    private Texture2D _titleScreenTexture, _tileSpriteSheet, _knightSpriteSheet, _logoSmall;
+    private Texture2D _titleScreenTexture, _tileSpriteSheet, _knightSpriteSheet, _logoSmall, _difficultyLegend;
     private KeyboardState _currentKeyboardState, _previousKeyboardState;
     private Dungeon _dungeon;
-    private readonly int _dungeonWidth = 29, _dungeonHeight = 17;
+    private readonly int _dungeonWidth = 27, _dungeonHeight = 17;
     private SpriteFont _defaultFont;
-    private Song _backgroundMusic1, _backgroundMusic2;
+    private Song _backgroundMusic1;
     private SoundEffect _chestOpen, _swordSound, _deathSound;
     private List<TextSprite> _floatingTexts = new();
+    private Player _player = new();
+
     public GameState CurrentState { get; set; }
     #endregion
 
     #region Constructor and initialization
-    public ZuulGame()
+    public SimpleZuulGame()
     {
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
@@ -49,6 +49,7 @@ public class ZuulGame : Game
         _tileSpriteSheet = Content.Load<Texture2D>("Graphics/sprite_sheet");
         _knightSpriteSheet = Content.Load<Texture2D>("Graphics/knight_spritesheet");
         _logoSmall = Content.Load<Texture2D>("Graphics/Zuul_logo_small");
+        _difficultyLegend = Content.Load<Texture2D>("Graphics/difficulty_192px");
 
         _defaultFont = Content.Load<SpriteFont>("Fonts/DefaultFont");
 
@@ -67,16 +68,11 @@ public class ZuulGame : Game
 
     protected override void Update(GameTime gameTime)
     {
+        base.Update(gameTime);
         _currentKeyboardState = Keyboard.GetState();
 
-        if (_currentKeyboardState.IsKeyDown(Keys.Escape))
-        {
-            Exit();
-        }
-        if (_currentKeyboardState.IsKeyDown(Keys.F5) && _previousKeyboardState.IsKeyUp(Keys.F5))
-        {
-            NewGame();
-        }
+        if (_currentKeyboardState.IsKeyDown(Keys.Escape)) { Exit(); }
+        if (_currentKeyboardState.IsKeyDown(Keys.F5) && _previousKeyboardState.IsKeyUp(Keys.F5)) { NewGame(); }
         if (_currentKeyboardState.IsKeyDown(Keys.F11) && !_previousKeyboardState.IsKeyDown(Keys.F11))
         {
             _graphics.IsFullScreen = !_graphics.IsFullScreen;
@@ -84,8 +80,6 @@ public class ZuulGame : Game
             return;
         }
 
-
-        base.Update(gameTime);
         switch (CurrentState)
         {
             case GameState.TitleScreen:
@@ -97,33 +91,29 @@ public class ZuulGame : Game
             case GameState.GameOver:
                 break;
         }
+
+        UpdateFloatingTexts(gameTime);
+        _previousKeyboardState = _currentKeyboardState;
+    }
+
+    private void UpdateFloatingTexts(GameTime gameTime)
+    {
+         
         _floatingTexts.ForEach(ft => ft.Update(gameTime));
         _floatingTexts.RemoveAll(ft => ft.IsExpired);
-        _previousKeyboardState = _currentKeyboardState;
     }
 
     private void MovePlayerBasedOnKeyboardState()
     {
-        Point oldPosition = _dungeon.PlayerPosition;
+        Point oldPosition = _dungeon.Player.Position;
         Tile.TileType tileType = Tile.TileType.Empty;
         Point direction = Point.Zero;
 
-        if (KeyWasPressed(Keys.Up) || KeyWasPressed(Keys.W))
-        {
-            direction = new Point(0, -1);
-        }
-        else if (KeyWasPressed(Keys.Down) || KeyWasPressed(Keys.S))
-        {
-            direction = new Point(0, 1);
-        }
-        else if (KeyWasPressed(Keys.Left) || KeyWasPressed(Keys.A))
-        {
-            direction = new Point(-1, 0);
-        }
-        else if (KeyWasPressed(Keys.Right) || KeyWasPressed(Keys.D))
-        {
-            direction = new Point(1, 0);
-        }
+        if (KeyWasPressed(Keys.Up) || KeyWasPressed(Keys.W)){direction = new Point(0, -1);}
+        else if (KeyWasPressed(Keys.Down) || KeyWasPressed(Keys.S)){direction = new Point(0, 1);}
+        else if (KeyWasPressed(Keys.Left) || KeyWasPressed(Keys.A)){direction = new Point(-1, 0);}
+        else if (KeyWasPressed(Keys.Right) || KeyWasPressed(Keys.D)){direction = new Point(1, 0);}
+
         if (direction != Point.Zero)
         {
             var newPosition = oldPosition + direction;
@@ -132,7 +122,7 @@ public class ZuulGame : Game
             if (HandleTileInteraction(newPosition))
             {
                 _dungeon.Tiles[newPosition.X, newPosition.Y].Type = Tile.TileType.Empty;
-                _dungeon.PlayerPosition = newPosition;
+                _dungeon.Player.Position = newPosition;
             }
         }
         if (_dungeon.ItemsLeft <= 0)
@@ -143,8 +133,10 @@ public class ZuulGame : Game
 
     private bool HandleTileInteraction(Point newPosition)
     {
+        // get the tile type at the new position
         Tile.TileType tileType = _dungeon.Tiles[newPosition.X, newPosition.Y].Type;
 
+        // handle interaction based on tile type
         switch (tileType)
         {
             case Tile.TileType.Empty:
@@ -153,7 +145,7 @@ public class ZuulGame : Game
                 _dungeon.ItemsLeft--;
                 var secondsToAdd = 5;
                 _chestOpen.Play();
-                _floatingTexts.Add(new TextSprite($"+{secondsToAdd} sec", _defaultFont, new Vector2(_dungeon.PlayerPosition.X * _knightSpriteSheet.Height, _dungeon.PlayerPosition.Y * _knightSpriteSheet.Height) + Vector2.UnitY * -32, new Vector2(0, -1), Color.Gold));
+                _floatingTexts.Add(new TextSprite($"+{secondsToAdd} sec", _defaultFont, new Vector2(_dungeon.Player.Position.X * _knightSpriteSheet.Height, _dungeon.Player.Position.Y * _knightSpriteSheet.Height) + Vector2.UnitY * -32, new Vector2(0, -1), Color.Gold));
                 return true;
             case Tile.TileType.Wall:
                 return false;
@@ -173,22 +165,27 @@ public class ZuulGame : Game
         var result = roll;
         if (result > rollToBeat)
         {
-            _floatingTexts.Add(new TextSprite($"Victory! ({result} > {rollToBeat})\n({roll}", _defaultFont, new Vector2(_dungeon.PlayerPosition.X * _knightSpriteSheet.Height, _dungeon.PlayerPosition.Y * _knightSpriteSheet.Height) + Vector2.UnitY * -32, new Vector2(0, -1), Color.LightGreen, 0.1f, 1500));
+            _floatingTexts.Add(new TextSprite($"Victory! ({result} > {rollToBeat})\n({roll}", _defaultFont, new Vector2(_dungeon.Player.Position.X * _knightSpriteSheet.Height, _dungeon.Player.Position.Y * _knightSpriteSheet.Height) + Vector2.UnitY * -32, new Vector2(0, -1), Color.LightGreen, 0.1f, 1500));
             _dungeon.ItemsLeft--;
             PlayRandomSwordSound();
+            _player.Score+= pointsForVictory;
             return true;
         }
         else
         {
+            // enemy hits player
+            // calculate damage, minimum of 1
             var damageTaken = Random.Shared.Next(6) + 1 + enemyDamageBonus;
+            damageTaken = Math.Max(damageTaken, 1);
 
             _deathSound.Play();
-            _floatingTexts.Add(new TextSprite($"Defeat! ({result} =< {rollToBeat})", _defaultFont, new Vector2(_dungeon.PlayerPosition.X * _knightSpriteSheet.Height, _dungeon.PlayerPosition.Y * _knightSpriteSheet.Height) + Vector2.UnitY * -32, new Vector2(0, -1), Color.IndianRed, 0.1f, 1500));
-            _hpLeft -= damageTaken;
+            _floatingTexts.Add(new TextSprite($"Defeat! ({result} <= {rollToBeat})", _defaultFont, new Vector2(_dungeon.Player.Position.X * _knightSpriteSheet.Height, _dungeon.Player.Position.Y * _knightSpriteSheet.Height) + Vector2.UnitY * -32, new Vector2(0, -1), Color.IndianRed, 0.1f, 1500));
+            _player.HitPoints -= damageTaken;
         }
-        if (_hpLeft <= 0)
+        if (_player.HitPoints <= 0)
         {
             CurrentState = GameState.GameOver;
+            _dungeon.Tiles[_dungeon.Player.Position.X, _dungeon.Player.Position.Y].Type = Tile.TileType.Tombstone;
 
         }
         return false;
@@ -206,9 +203,9 @@ public class ZuulGame : Game
 
     private void NewGame()
     {
-        _dungeon = DungeonGenerator.GenerateDungeon(_dungeonWidth, _dungeonHeight, _tileSpriteSheet, _knightSpriteSheet);
+        _dungeon = DungeonGenerator.GenerateDungeon(_dungeonWidth, _dungeonHeight, _player, _tileSpriteSheet, _knightSpriteSheet);
         PlayMusic();
-        _hpLeft = MAX_HP;
+        _player.Reset();
         CurrentState = GameState.Playing;
     }
 
@@ -237,7 +234,7 @@ public class ZuulGame : Game
                 _dungeon.Draw(_spriteBatch, gameTime, Vector2.Zero);
                 DrawMiniLogo(gameTime);
                 _floatingTexts.ForEach(ft => ft.Draw(_spriteBatch, gameTime));
-
+                DrawDifficultyLegend();
                 WriteItemsLeft();
                 break;
         }
@@ -246,10 +243,16 @@ public class ZuulGame : Game
         _spriteBatch.End();
     }
 
+    private void DrawDifficultyLegend()
+    {
+        
+        _spriteBatch.Draw(_difficultyLegend, new Vector2(_graphics.PreferredBackBufferWidth-_difficultyLegend.Width +10 , 250), Color.White);
+    }
+
     private void WriteItemsLeft()
     {
         // draw the score below the bonus o meter
-        var itemsLeftText = $"{_dungeon.ItemsLeft} tiles. {_hpLeft} hp left";
+        var itemsLeftText = $"{_player.Score} points | {_player.HitPoints} hp left";
 
         var textSize = _defaultFont.MeasureString(itemsLeftText);
         _spriteBatch.DrawString(_defaultFont, itemsLeftText, new Vector2((_graphics.PreferredBackBufferWidth - textSize.X) / 2, 20), Color.White);
@@ -259,15 +262,16 @@ public class ZuulGame : Game
     {
         //calculate a destination rectangle for the logo with a scaling factor of 0.5
 
-        var logoScale = 0.5f;
+        int xOffsetForDungeonWidth = _dungeonWidth * _tileSpriteSheet.Height -7 ;
+        var logoScale = 0.4f;
         var destinationRectangle = new Rectangle(
-            25,
-             25 + (int)(Math.Sin(gameTime.TotalGameTime.TotalMilliseconds / 350) * 10),
+            xOffsetForDungeonWidth,
+             15 + (int)(Math.Sin(gameTime.TotalGameTime.TotalMilliseconds / 350) * 10),
             (int)(_logoSmall.Width * logoScale),
             (int)(_logoSmall.Height * logoScale)
         );
 
-        _spriteBatch.Draw(_logoSmall, destinationRectangle, Color.White * 0.7f);
+        _spriteBatch.Draw(_logoSmall, destinationRectangle, Color.White);
     }
 
     private void DrawTitleScreen()

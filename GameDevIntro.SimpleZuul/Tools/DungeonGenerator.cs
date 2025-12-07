@@ -25,9 +25,9 @@ internal static class DungeonGenerator
         new Point(0, 1)    // Down
     };
 
-    public static Dungeon GenerateDungeon(int width, int height, Texture2D spriteSheet, Texture2D playerSpriteSheet)
+    public static Dungeon GenerateDungeon(int width, int height, Player player, Texture2D spriteSheet, Texture2D playerSpriteSheet)
     {
-        var dungeon = new Dungeon(width, height, spriteSheet, playerSpriteSheet);
+        var dungeon = new Dungeon(width, height, player, spriteSheet, playerSpriteSheet);
 
         // Initialize all tiles as walls
         for (int x = 0; x < dungeon.Width; x++)
@@ -41,7 +41,7 @@ internal static class DungeonGenerator
         // If the dungeon is too small to carve, return as-is
         if (dungeon.Width < 5 || dungeon.Height < 5)
         {
-            dungeon.PlayerPosition = new Point(width / 2, height / 2);
+            dungeon.Player.Position = new Point(width / 2, height / 2);
             return dungeon;
         }
 
@@ -53,7 +53,7 @@ internal static class DungeonGenerator
         startX = Math.Clamp(startX, 1, width - 2);
         startY = Math.Clamp(startY, 1, height - 2);
         
-        dungeon.PlayerPosition = new Point(startX, startY);
+        dungeon.Player.Position = new Point(startX, startY);
 
         // Random depth-first maze generation
         GenerateRandomMaze(dungeon, startX, startY);
@@ -222,8 +222,8 @@ internal static class DungeonGenerator
         {
             for (int y = 0; y < dungeon.Height; y++)
             {
-                var deltaX = Math.Abs( x - dungeon.PlayerPosition.X);
-                var deltaY = Math.Abs( y - dungeon.PlayerPosition.Y);
+                var deltaX = Math.Abs( x - dungeon.Player.Position.X);
+                var deltaY = Math.Abs( y - dungeon.Player.Position.Y);
                 if (deltaX < 2 || deltaY < 2)
                 {
                     continue; // Skip player position

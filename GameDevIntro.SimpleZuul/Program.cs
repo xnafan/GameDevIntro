@@ -1,2 +1,2 @@
-﻿using var game = new GameDevIntro.SimpleZuul.ZuulGame();
+﻿using var game = new GameDevIntro.SimpleZuul.SimpleZuulGame();
 game.Run();
