@@ -80,4 +80,6 @@ public class Sprite
             Texture.Width,
             Texture.Height);
     }
+
 }
+

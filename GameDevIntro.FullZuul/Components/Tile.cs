@@ -6,8 +6,8 @@ namespace GameDevIntro.SimpleZuul.Model;
 internal class Tile
 {
     Texture2D _spriteSheet;
-    
-    public enum TileType {Empty, Wall, Slime, Skeleton, Dragon, Chest }
+
+    public enum TileType { Empty, Wall, Slime, Skeleton, Dragon, Chest, Tombstone }
 
     public TileType Type { get; set; }
 
