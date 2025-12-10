@@ -62,7 +62,7 @@ public class CheeseFactory
             var cheese = new Sprite(
                 GetRandomPositionAboveScreen(),
                 CheeseTexture,
-                .25f,
+                .2f,
                 Vector2.UnitY);
                 
             _cheeses.Add(cheese);
@@ -72,6 +72,7 @@ public class CheeseFactory
 
     private void SortCheeses()
     {
+        // Sort cheeses by Y position descending for proper drawing order
         _cheeses.Sort((a, b) => b.Position.Y.CompareTo(a.Position.Y));
     }
 
@@ -125,6 +126,7 @@ public class CheeseFactory
             var cheese = _cheeses[i];
             if (cheese.GetBoundingRectangle().Contains(position))
             {
+                Debug.WriteLine("Cheese popped at position: " + position);
                 return cheese;
             }
         }
