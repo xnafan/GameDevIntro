@@ -7,7 +7,8 @@ internal class Snake
 {
     private List<Point> _segmentLocations = new();
     public  Point Direction { get; set; }
-    public Color Color { get; set; } = Color.Green;
+    public Point DesiredDirection { get; set; }
+    public Color Color { get; set; } = Color.White;
     private bool _growing = false;
     public Vector2 SegmentSize { get; set; }
     public  Texture2D SegmentTexture { get; set; }
@@ -18,7 +19,7 @@ internal class Snake
     {
         SegmentTexture = segmentTexture;
         var currentLocation = headLocation;
-        Direction = direction;
+       Direction = DesiredDirection = direction;
         _msPerMove = 1000f / movesPerSecond;
         SegmentSize = _segmentSize;
 
@@ -39,7 +40,12 @@ internal class Snake
         _msLeftBeforeMove -= (float)gameTime.ElapsedGameTime.TotalMilliseconds;
         if (_msLeftBeforeMove > 0)
             return;
-        Move(Direction);
+        if (DesiredDirection != Point.Zero && DesiredDirection != SimpleSnakeGame.OppositeDirections[Direction])
+        {
+            Direction = DesiredDirection;
+        }
+       Move(Direction);
+
         _msLeftBeforeMove += _msPerMove + _msLeftBeforeMove;
     }
 
@@ -74,6 +80,16 @@ internal class Snake
         foreach (var segment in _segmentLocations)
         {
             if (segment == position)
+                return true;
+        }
+        return false;
+    }
+    public bool IsHeadCollidingWithBody()
+    {
+        var headPosition = HeadPosition;
+        for (int i = 1; i < _segmentLocations.Count; i++)
+        {
+            if (_segmentLocations[i] == headPosition)
                 return true;
         }
         return false;

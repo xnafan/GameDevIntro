@@ -15,6 +15,7 @@ public class SimpleSnakeGame : Game
     private Vector2 _boardOffset = new Vector2(50, 50), _tileSize = Vector2.One * 32;
     private readonly List<Point> _borderTiles = new();
     private Point _apple;
+    private int _movesPerSecond = 5;
 
     public static readonly Dictionary<Keys, Point> DirectionMappings = new()
     {
@@ -38,14 +39,11 @@ public class SimpleSnakeGame : Game
         IsMouseVisible = true;
         _graphics.PreferredBackBufferWidth = 1024;
         _graphics.PreferredBackBufferHeight = 768;
-        
     }
-
-
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
-        _whiteTexture = new Texture2D(GraphicsDevice, 1,1);
+        _whiteTexture = new Texture2D(GraphicsDevice, 1, 1);
         _whiteTexture.SetData(new[] { Color.White });
         NewGame();
     }
@@ -54,7 +52,7 @@ public class SimpleSnakeGame : Game
     {
         CalculateBorderOffset();
         CalculateBorderTilePositions();
-        _snake = new Snake(_whiteTexture, new Point(_boardSizeInTiles/2, _boardSizeInTiles/2),  new Point(0,-1), 4,  _tileSize, 2);
+        _snake = new Snake(_whiteTexture, new Point(_boardSizeInTiles / 2, _boardSizeInTiles / 2), new Point(0, -1), _movesPerSecond, _tileSize, 2);
         PlaceAppleRandomly();
     }
 
@@ -90,18 +88,20 @@ public class SimpleSnakeGame : Game
         {
             if (Keyboard.GetState().IsKeyDown(mapping.Key))
             {
-                // Prevent reversing direction
                 if (mapping.Value != OppositeDirections[_snake.Direction])
                 {
-                    _snake.Direction = mapping.Value;
+                    _snake.DesiredDirection = mapping.Value;
+
                 }
             }
         }
         base.Update(gameTime);
         _snake.Update(gameTime);
-        if (SnakeHeadCollidedWithBorder()) { NewGame(); }
+        if (SnakeHeadCollidedWithBorder() || SnakeHeadCollidedWithBody()) { NewGame(); }
         CheckForSnakeEatingApple();
     }
+
+    private bool SnakeHeadCollidedWithBody() => _snake.IsHeadCollidingWithBody();
 
     private void CheckForSnakeEatingApple()
     {
@@ -124,9 +124,10 @@ public class SimpleSnakeGame : Game
                headPosition.Y <= 0 || headPosition.Y >= _boardSizeInTiles - 1;
     }
 
+
     protected override void Draw(GameTime gameTime)
     {
-        GraphicsDevice.Clear(Color.CornflowerBlue);
+        GraphicsDevice.Clear(Color.Silver);
         base.Draw(gameTime);
 
         _spriteBatch.Begin();
