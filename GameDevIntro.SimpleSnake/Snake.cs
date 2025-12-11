@@ -1,25 +1,25 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
-
 namespace GameDevIntro.SimpleSnake;
 internal class Snake
 {
+    #region Variables and properties
     private List<Point> _segmentLocations = new();
-    public  Point Direction { get; set; }
+    public Point Direction { get; set; }
     public Point DesiredDirection { get; set; }
     public Color Color { get; set; } = Color.White;
     private bool _growing = false;
     public Vector2 SegmentSize { get; set; }
-    public  Texture2D SegmentTexture { get; set; }
-    public Point HeadPosition { get => _segmentLocations[0];}
-
+    public Texture2D SegmentTexture { get; set; }
+    public Point HeadPosition { get => _segmentLocations[0]; }
     private float _msPerMove = 200, _msLeftBeforeMove;
+    #endregion
     public Snake(Texture2D segmentTexture, Point headLocation, Point direction, int movesPerSecond, Vector2 _segmentSize, int initialLength = 2)
     {
         SegmentTexture = segmentTexture;
         var currentLocation = headLocation;
-       Direction = DesiredDirection = direction;
+        Direction = DesiredDirection = direction;
         _msPerMove = 1000f / movesPerSecond;
         SegmentSize = _segmentSize;
 
@@ -30,10 +30,7 @@ internal class Snake
         }
     }
 
-    public void Grow()
-    {
-        _growing = true;
-    }
+    public void Grow() => _growing = true;
 
     public void Update(GameTime gameTime)
     {
@@ -44,19 +41,9 @@ internal class Snake
         {
             Direction = DesiredDirection;
         }
-       Move(Direction);
+        Move(Direction);
 
         _msLeftBeforeMove += _msPerMove + _msLeftBeforeMove;
-    }
-
-    public void Draw(SpriteBatch spriteBatch, Vector2 offset)
-    {
-        foreach (var segmentLocation in _segmentLocations)
-        {
-            var drawPosition = offset + new Vector2(segmentLocation.X * SegmentSize.X, segmentLocation.Y * SegmentSize.Y);
-            spriteBatch.Draw(SegmentTexture, new Rectangle((int)drawPosition.X, (int)drawPosition.Y, (int)SegmentSize.X, (int)SegmentSize.Y), Color);
-
-        }
     }
 
 
@@ -74,8 +61,7 @@ internal class Snake
             _growing = false;
         }
     }
-
-    public bool IsOccupyingPosition(Point position)
+    public bool BodyOverlapsPosition(Point position)
     {
         foreach (var segment in _segmentLocations)
         {
@@ -93,5 +79,13 @@ internal class Snake
                 return true;
         }
         return false;
+    }
+    public void Draw(SpriteBatch spriteBatch, Vector2 offset)
+    {
+        foreach (var segmentLocation in _segmentLocations)
+        {
+            var drawPosition = offset + new Vector2(segmentLocation.X * SegmentSize.X, segmentLocation.Y * SegmentSize.Y);
+            spriteBatch.Draw(SegmentTexture, new Rectangle((int)drawPosition.X, (int)drawPosition.Y, (int)SegmentSize.X, (int)SegmentSize.Y), Color);
+        }
     }
 }
