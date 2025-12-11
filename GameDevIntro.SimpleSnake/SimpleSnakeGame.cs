@@ -16,7 +16,7 @@ public class SimpleSnakeGame : Game
     private Vector2 _boardOffset = new Vector2(50, 50), _tileSize = Vector2.One * 32;
     private readonly List<Point> _borderTiles = new();
     private Point _apple;
-    private int _movesPerSecond = 5, _score;
+    private int _movesPerSecond = 5, _score, _highScore;
     private SpriteFont _font, _titleFont;
 
     public static readonly Dictionary<Keys, Point> DirectionMappings = new()
@@ -124,6 +124,7 @@ public class SimpleSnakeGame : Game
         {
             _snake.Grow();
             _score++;
+            if (_score > _highScore) { _highScore = _score; }
             PlaceAppleRandomly();
         }
     }
@@ -177,7 +178,7 @@ public class SimpleSnakeGame : Game
         _spriteBatch.DrawString(_titleFont, titleText, new Vector2((_graphics.PreferredBackBufferWidth - titleSize.X) / 2, (_boardOffset.Y - titleSize.Y) / 2), Color.Black);
 
         // Draw score centered at the bottom, centered horizontally and vertically centered in the space below the board
-        var scoreText = $"Score: {_score}";
+        var scoreText = $"Score: {_score} (highScore: {_highScore})";
         var scoreSize = _font.MeasureString(scoreText);
         _spriteBatch.DrawString(_font, scoreText, new Vector2((_graphics.PreferredBackBufferWidth - scoreSize.X) / 2, _boardOffset.Y + _tileSize.Y * _boardSizeInTiles + ((_graphics.PreferredBackBufferHeight - (_boardOffset.Y + _tileSize.Y * _boardSizeInTiles)) - scoreSize.Y) / 2), Color.Black);
 
