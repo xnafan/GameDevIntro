@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameDevIntro.FullZuul", "Ga
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameDevIntro.DodgeWall", "GameDevIntro.DodgeWall\GameDevIntro.DodgeWall.csproj", "{2BD39D4F-41C0-4A26-A224-9AF4F84AC604}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameDevIntro.SimpleSnake", "GameDevIntro.SimpleSnake\GameDevIntro.SimpleSnake.csproj", "{1C5C452D-9E21-4635-9838-B33888DDC806}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{2BD39D4F-41C0-4A26-A224-9AF4F84AC604}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2BD39D4F-41C0-4A26-A224-9AF4F84AC604}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2BD39D4F-41C0-4A26-A224-9AF4F84AC604}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C5C452D-9E21-4635-9838-B33888DDC806}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C5C452D-9E21-4635-9838-B33888DDC806}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C5C452D-9E21-4635-9838-B33888DDC806}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C5C452D-9E21-4635-9838-B33888DDC806}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

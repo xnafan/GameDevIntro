@@ -1,6 +1,7 @@
 ﻿using GameDevIntro.DodgeWall.Components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 
@@ -58,8 +59,14 @@ public class DodgeWallGame : Game
 
     protected override void Update(GameTime gameTime)
     {
+        IfEscapePressedThenExitGame();
         MoveBlockLinesAndPushPlayerIfNeeded(gameTime);
         _player.Update(gameTime);
+    }
+
+    private void IfEscapePressedThenExitGame()
+    {
+        if (Keyboard.GetState().IsKeyDown(Keys.Escape)) { Exit(); }
     }
 
     private void MoveBlockLinesAndPushPlayerIfNeeded(GameTime gameTime)
