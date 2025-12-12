@@ -15,6 +15,8 @@ internal class Snake
     public Point HeadPosition { get => _segmentLocations[0]; }
     private float _msPerMove = 200, _msLeftBeforeMove;
     #endregion
+
+    #region Constructor
     public Snake(Texture2D segmentTexture, Point headLocation, Point direction, int movesPerSecond, Vector2 _segmentSize, int initialLength = 2)
     {
         SegmentTexture = segmentTexture;
@@ -28,10 +30,10 @@ internal class Snake
             _segmentLocations.Add(currentLocation);
             currentLocation -= direction;
         }
-    }
+    } 
+    #endregion
 
-    public void Grow() => _growing = true;
-
+    #region Updating and Movement
     public void Update(GameTime gameTime)
     {
         _msLeftBeforeMove -= (float)gameTime.ElapsedGameTime.TotalMilliseconds;
@@ -61,6 +63,11 @@ internal class Snake
             _growing = false;
         }
     }
+    public void Grow() => _growing = true;
+
+    #endregion
+
+    #region Methods for checking overlapping areas
     public bool BodyOverlapsPosition(Point position)
     {
         foreach (var segment in _segmentLocations)
@@ -80,6 +87,9 @@ internal class Snake
         }
         return false;
     }
+    #endregion
+
+    #region Draw()
     public void Draw(SpriteBatch spriteBatch, Vector2 offset)
     {
         foreach (var segmentLocation in _segmentLocations)
@@ -87,5 +97,6 @@ internal class Snake
             var drawPosition = offset + new Vector2(segmentLocation.X * SegmentSize.X, segmentLocation.Y * SegmentSize.Y);
             spriteBatch.Draw(SegmentTexture, new Rectangle((int)drawPosition.X, (int)drawPosition.Y, (int)SegmentSize.X, (int)SegmentSize.Y), Color);
         }
-    }
+    } 
+    #endregion
 }
